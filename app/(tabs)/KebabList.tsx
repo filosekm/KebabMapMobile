@@ -45,7 +45,7 @@ export default function KebabList() {
             setLoading(false);
         }
     };
-
+    
     useEffect(() => {
         let filteredData = [...data];
         if (filterStatus !== 'all') {
@@ -69,10 +69,30 @@ export default function KebabList() {
         setFilterStatus(status);
     };
 
+    // liczba kebabów
+    const totalKebabs = data.length;
+    const openKebabs = data.filter(kebab => kebab.status === 'open').length;
+    const closedKebabs = data.filter(kebab => kebab.status === 'closed').length;
+    const plannedKebabs = data.filter(kebab => kebab.status === 'planned').length;
+
     return (
         <View style={styles.container}>
             <View style={styles.headerContainer}>
                 <ThemedText style={styles.title} type="title">Lista Legnickich Kebabów</ThemedText>
+                <View style={styles.counterContainer}>
+                    <Text style={styles.counterText}>
+                        W Legnicy mamy łącznie <Text style={styles.counterHighlight}>{totalKebabs}</Text> kebabów, w tym:
+                    </Text>
+                    <Text style={styles.counterText}>
+                        <Text style={styles.counterHighlight}>{openKebabs}</Text> Otwartych
+                    </Text>
+                    <Text style={styles.counterText}>
+                        <Text style={styles.counterHighlight}>{plannedKebabs}</Text> Planowanych
+                    </Text>
+                    <Text style={styles.counterText}>
+                        <Text style={styles.counterHighlight}>{closedKebabs}</Text> Zamkniętych
+                    </Text>
+                </View>
             </View>
             {loading ? (
                 <ActivityIndicator size="large" color="#00ff00" />
@@ -132,6 +152,23 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         color: '#FFFFFF',
+    },
+    counterContainer: {
+        backgroundColor: '#2e2e2e',
+        padding: 10,
+        borderRadius: 8,
+        marginVertical: 10,
+        alignItems: 'center',
+    },
+    counterText: {
+        fontSize: 16,
+        color: '#FFFFFF',
+        textAlign: 'center',
+        marginVertical: 2,
+    },
+    counterHighlight: {
+        color: '#FFD700',
+        fontWeight: 'bold',
     },
     controls: {
         flexDirection: 'row',
