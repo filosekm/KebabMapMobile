@@ -1,19 +1,32 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-
+// app/(tabs)/_layout.tsx
+import React, { useContext } from 'react';
+import { Tabs, useRouter } from 'expo-router';
+import { TouchableOpacity } from 'react-native';
+import { AuthContext } from '@/context/AuthContext';
 import { TabBarIcon } from '@/components/navigation/TabBarIcon';
+import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
+    const { userToken } = useContext(AuthContext);
+    const router = useRouter();
+
+    const handleProfileTabPress = () => {
+        if (!userToken) {
+            router.push('/(auth)/Login');
+            return false;
+        }
+        return true;
+    };
 
     return (
         <Tabs
             screenOptions={{
                 tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
                 headerShown: false,
-            }}>
+            }}
+        >
             <Tabs.Screen
                 name="index"
                 options={{
@@ -24,20 +37,26 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="explore"
+                name="KebabList"
                 options={{
-                    title: 'Explore',
+                    title: 'Kebab List',
                     tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'code-slash' : 'code-slash-outline'} color={color} />
+                        <TabBarIcon name={focused ? 'list' : 'list-outline'} color={color} />
                     ),
                 }}
             />
             <Tabs.Screen
-                name="KebabList"
+                name="Profile"
                 options={{
-                    title: 'KebabList',
+                    title: 'Profil',
                     tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'list' : 'list-outline'} color={color} />
+                        <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
+                    ),
+                    tabBarButton: (props) => (
+                        <TouchableOpacity
+                            {...props}
+                            onPress={() => handleProfileTabPress() && props.onPress?.()}
+                        />
                     ),
                 }}
             />

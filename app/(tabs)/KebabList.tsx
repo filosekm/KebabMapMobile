@@ -1,7 +1,6 @@
 
 import { ThemedText } from '@/components/ThemedText';
 import {StyleSheet, View} from "react-native";
-import {HelloWave} from "@/components/HelloWave";
 import React from "react";
 
 export default function KebabList() {
@@ -17,13 +16,12 @@ export default function KebabList() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#A1CEDC',
+        backgroundColor: '#1e1e1e',
     },
     headerContainer: {
         alignItems: 'center',
         justifyContent: 'center',
         paddingVertical: 10,
-        backgroundColor: '#1D3D47',
     },
     title: {
         marginTop: 30,
