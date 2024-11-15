@@ -1,5 +1,5 @@
 import { ThemedText } from '@/components/ThemedText';
-import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, useColorScheme } from 'react-native';
 import React, { useState, useEffect } from 'react';
 // import axios from 'axios'; // gdy API będzie gotowe
 
@@ -14,12 +14,13 @@ const mockData = [
 
 export default function KebabList() {
     const [data, setData] = useState([]);
-    const [displayData, setDisplayData] = useState([]); // Dane do wyświetlenia po sortowaniu/filtrowaniu
+    const [displayData, setDisplayData] = useState([]);
     const [sortAsc, setSortAsc] = useState(true);
     const [filterStatus, setFilterStatus] = useState('all');
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const colorScheme = useColorScheme();
     const ITEMS_PER_PAGE = 5;
 
     const fetchData = async () => {
@@ -45,7 +46,7 @@ export default function KebabList() {
             setLoading(false);
         }
     };
-    
+
     useEffect(() => {
         let filteredData = [...data];
         if (filterStatus !== 'all') {
@@ -74,6 +75,7 @@ export default function KebabList() {
     const openKebabs = data.filter(kebab => kebab.status === 'open').length;
     const closedKebabs = data.filter(kebab => kebab.status === 'closed').length;
     const plannedKebabs = data.filter(kebab => kebab.status === 'planned').length;
+    const styles = getStyles(colorScheme);
 
     return (
         <View style={styles.container}>
@@ -125,7 +127,7 @@ export default function KebabList() {
                         <TouchableOpacity onPress={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>
                             <Text style={styles.pageButton}>Poprzednia</Text>
                         </TouchableOpacity>
-                        <Text>Strona {page}</Text>
+                        <Text style={styles.numberButton}>Strona {page}</Text>
                         <TouchableOpacity onPress={() => setPage(page + 1)}>
                             <Text style={styles.pageButton}>Następna</Text>
                         </TouchableOpacity>
@@ -136,10 +138,10 @@ export default function KebabList() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colorScheme) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#1e1e1e',
+        backgroundColor: colorScheme === 'dark' ? '#1e1e1e' : '#FFFFFF',
         padding: 16,
     },
     headerContainer: {
@@ -151,10 +153,10 @@ const styles = StyleSheet.create({
         marginTop: 30,
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#FFFFFF',
+        color: colorScheme === 'dark' ? '#FFFFFF' : '#000000',
     },
     counterContainer: {
-        backgroundColor: '#2e2e2e',
+        backgroundColor: colorScheme === 'dark' ? '#2e2e2e' : '#f0f0f0',
         padding: 10,
         borderRadius: 8,
         marginVertical: 10,
@@ -162,12 +164,12 @@ const styles = StyleSheet.create({
     },
     counterText: {
         fontSize: 16,
-        color: '#FFFFFF',
+        color: colorScheme === 'dark' ? '#FFFFFF' : '#000000',
         textAlign: 'center',
         marginVertical: 2,
     },
     counterHighlight: {
-        color: '#FFD700',
+        color: '#dd2c00',
         fontWeight: 'bold',
     },
     controls: {
@@ -178,7 +180,7 @@ const styles = StyleSheet.create({
     sortButton: {
         fontWeight: 'bold',
         fontSize: 16,
-        color: 'white',
+        color: colorScheme === 'dark' ? '#FFFFFF' : '#000000',
     },
     filterContainer: {
         flexDirection: 'row',
@@ -186,18 +188,18 @@ const styles = StyleSheet.create({
     filterButton: {
         marginHorizontal: 5,
         fontSize: 14,
-        color: 'blue',
+        color: colorScheme === 'dark' ? '#E47833' : '#E47833',
     },
     item: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         padding: 10,
         borderBottomWidth: 1,
-        borderBottomColor: '#444',
+        borderBottomColor: colorScheme === 'dark' ? '#444' : '#CCC',
     },
     name: {
         fontSize: 16,
-        color: '#FFFFFF',
+        color: colorScheme === 'dark' ? '#FFFFFF' : '#000000',
     },
     status: {
         fontSize: 14,
@@ -209,7 +211,10 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     pageButton: {
-        color: 'blue',
+        color: colorScheme === 'dark' ? '#717171' : '#717171',
+    },
+    numberButton: {
+        color: colorScheme === 'dark' ? '#3f3f3f' : '#3f3f3f',
     },
     errorText: {
         color: 'red',
