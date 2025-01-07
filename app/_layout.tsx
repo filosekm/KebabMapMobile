@@ -1,4 +1,4 @@
-// app/_layout.tsx
+
 import React, { useEffect } from 'react';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -30,6 +30,7 @@ export default function RootLayout() {
             <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
                 <Stack screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                    <Stack.Screen name="screens/KebabDetails" options={{ headerShown: false }} />
                     <Stack.Screen name="+not-found" />
                 </Stack>
             </ThemeProvider>

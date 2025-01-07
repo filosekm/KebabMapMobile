@@ -19,11 +19,10 @@ export default function LoginScreen() {
             });
 
             const data = await response.json();
-            console.log("Received data from API:", data); // Logowanie odpowiedzi API
 
-            if (response.ok && data.token) {  // Sprawdzanie, czy token istnieje
-                await login(data.token);  // Zapisz token w kontekście
-                router.push('/(tabs)/Profile');  // Przekieruj do profilu
+            if (response.ok && data.token) {
+                await login(data.token);
+                router.push('/(tabs)/Profile');
             } else {
                 Alert.alert('Błąd logowania', data.message || 'Nieprawidłowe dane logowania');
             }

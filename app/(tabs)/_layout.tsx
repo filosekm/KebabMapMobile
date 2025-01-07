@@ -1,4 +1,4 @@
-// app/(tabs)/_layout.tsx
+
 import React, { useContext } from 'react';
 import { Tabs, useRouter } from 'expo-router';
 import { TouchableOpacity } from 'react-native';
