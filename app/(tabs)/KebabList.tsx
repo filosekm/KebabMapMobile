@@ -2,14 +2,33 @@ import { ThemedText } from '@/components/ThemedText';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, useColorScheme } from 'react-native';
 import React, { useState, useEffect } from 'react';
 // import axios from 'axios'; // gdy API będzie gotowe
+import { useRouter } from 'expo-router';
+import { Image } from 'react-native';
 
 // przykładowe dane zeby cos sie wyswietlało
 const mockData = [
-    { id: '1', name: 'Mock Kebab A', status: 'open' },
-    { id: '2', name: 'Mock Kebab B', status: 'closed' },
-    { id: '3', name: 'Mock Kebab C', status: 'planned' },
-    { id: '4', name: 'Mock Kebab D', status: 'open' },
-    { id: '5', name: 'Mock Kebab E', status: 'closed' },
+    {
+        id: '1',
+        name: 'Mock Kebab A',
+        status: 'open',
+        logo: 'https://example.com/logo_a.png',
+        address: 'Ul. Rynek 1, Legnica',
+        latitude: 51.2074,
+        longitude: 16.1554,
+        yearOpened: 2010,
+        yearClosed: null,
+    },
+    {
+        id: '2',
+        name: 'Mock Kebab B',
+        status: 'closed',
+        logo: 'https://example.com/logo_b.png',
+        address: 'Ul. Kwiatowa 2, Legnica',
+        latitude: 51.2100,
+        longitude: 16.1600,
+        yearOpened: 2008,
+        yearClosed: 2019,
+    },
 ];
 
 export default function KebabList() {
@@ -20,6 +39,7 @@ export default function KebabList() {
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const router = useRouter();
     const colorScheme = useColorScheme();
     const ITEMS_PER_PAGE = 5;
 
@@ -117,9 +137,14 @@ export default function KebabList() {
                         data={displayData.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
-                            <TouchableOpacity style={styles.item} onPress={() => console.log('Navigate to details of', item.name)}>
-                                <Text style={styles.name}>{item.name}</Text>
-                                <Text style={styles.status}>{item.status}</Text>
+                            <TouchableOpacity
+                                style={styles.item}
+                                onPress={() => router.push(`/screens/KebabDetails?markerId=${item.id}`)} // Nawigacja
+                            >
+                                <View style={styles.textContainer}>
+                                    <Text style={styles.name}>{item.name}</Text>
+                                    <Text style={styles.address}>{item.address}</Text>
+                                </View>
                             </TouchableOpacity>
                         )}
                     />
@@ -128,7 +153,15 @@ export default function KebabList() {
                             <Text style={styles.pageButton}>Poprzednia</Text>
                         </TouchableOpacity>
                         <Text style={styles.numberButton}>Strona {page}</Text>
-                        <TouchableOpacity onPress={() => setPage(page + 1)}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                const totalPages = Math.ceil(displayData.length / ITEMS_PER_PAGE);
+                                if (page < totalPages) {
+                                    setPage(page + 1);
+                                }
+                            }}
+                            disabled={page >= Math.ceil(displayData.length / ITEMS_PER_PAGE)}
+                        >
                             <Text style={styles.pageButton}>Następna</Text>
                         </TouchableOpacity>
                     </View>
@@ -192,7 +225,7 @@ const getStyles = (colorScheme) => StyleSheet.create({
     },
     item: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         padding: 10,
         borderBottomWidth: 1,
         borderBottomColor: colorScheme === 'dark' ? '#444' : '#CCC',
@@ -200,6 +233,10 @@ const getStyles = (colorScheme) => StyleSheet.create({
     name: {
         fontSize: 16,
         color: colorScheme === 'dark' ? '#FFFFFF' : '#000000',
+    },
+    address: {
+        fontSize: 12,
+        color: colorScheme === 'dark' ? '#FFFFE0' : '#F4A460',
     },
     status: {
         fontSize: 14,
@@ -211,13 +248,16 @@ const getStyles = (colorScheme) => StyleSheet.create({
         marginTop: 10,
     },
     pageButton: {
-        color: colorScheme === 'dark' ? '#717171' : '#717171',
+        color: colorScheme === 'dark' ? '#87CEEB' : '#87CEEB',
     },
     numberButton: {
-        color: colorScheme === 'dark' ? '#3f3f3f' : '#3f3f3f',
+        color: colorScheme === 'dark' ? '#0000FF' : '#0000FF',
     },
     errorText: {
         color: 'red',
         textAlign: 'center',
+    },
+    textContainer: {
+        flex: 1,
     },
 });

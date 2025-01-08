@@ -3,6 +3,7 @@ import {
     StyleSheet,
     View,
     Text,
+    Image,
     TouchableOpacity,
     FlatList,
     TextInput,
@@ -23,12 +24,21 @@ type CommentType = {
 type KebabDetailsType = {
     id: string;
     name: string;
-    location: string;
+    logo: string;
+    address: string;
     latitude: number;
     longitude: number;
     description: string;
     opening_hours: string;
     rating: number;
+    yearOpened: number;
+    yearClosed: number | null;
+    hours: string;
+    meats: string[];
+    sauces: string[];
+    status: string;
+    craft: boolean;
+    orderMethods: string[];
 };
 
 export default function KebabDetails() {
@@ -78,12 +88,10 @@ export default function KebabDetails() {
             Alert.alert('Error', 'You must be logged in to add a comment.');
             return;
         }
-
         if (!newComment.trim()) {
             Alert.alert('Error', 'Comment cannot be empty.');
             return;
         }
-
         try {
             const response = await fetch('http://192.168.0.210/kebab_api/add_comment.php', {
                 method: 'POST',
@@ -94,17 +102,14 @@ export default function KebabDetails() {
                     content: newComment,
                 }),
             });
-
             if (response.ok) {
                 const newCommentData = {
                     id: Date.now().toString(), // Generowanie tymczasowego ID
                     user: userEmail,
                     content: newComment,
                 };
-
                 // Aktualizacja stanu lokalnego
                 setComments((prevComments) => [newCommentData, ...prevComments]);
-
                 // Czyszczenie pola tekstowego
                 setNewComment('');
             } else {
@@ -114,14 +119,11 @@ export default function KebabDetails() {
             console.error('Error adding comment:', error);
         }
     };
-
-
     const handleToggleFavorite = async () => {
         if (!userToken) {
             Alert.alert('Error', 'You must be logged in to add to favorites.');
             return;
         }
-
         try {
             const response = await fetch('http://192.168.0.210/kebab_api/toggle_favorite.php', {
                 method: 'POST',
@@ -131,7 +133,6 @@ export default function KebabDetails() {
                     user: userEmail,
                 }),
             });
-
             if (response.ok) {
                 setIsFavorite(!isFavorite);
                 Alert.alert('Success', isFavorite ? 'Removed from favorites.' : 'Added to favorites!');
@@ -155,26 +156,32 @@ export default function KebabDetails() {
 
     return (
         <View style={[styles.container, isDarkMode ? styles.darkBackground : styles.lightBackground]}>
-            <View style={styles.headerContainer}>
-                <Text style={[styles.title, isDarkMode ? styles.darkText : styles.lightText]}>
-                    {kebabDetails.name}
-                </Text>
-            </View>
-
-            <View style={styles.locationContainer}>
-                <Text style={[styles.subText, isDarkMode ? styles.darkText : styles.lightText]}>
-                    {kebabDetails.location}
-                </Text>
-                <TouchableOpacity onPress={handleToggleFavorite}>
-                    <AntDesign
-                        name={isFavorite ? 'heart' : 'hearto'}
-                        size={24}
-                        color={isFavorite ? 'red' : isDarkMode ? 'white' : 'black'}
-                    />
-                </TouchableOpacity>
-            </View>
-
-
+            <Text style={[styles.title, isDarkMode ? styles.darkText : styles.lightText]}>
+                {kebabDetails.name}
+            </Text>
+            <Image source={{ uri: kebabDetails.logo }} style={styles.logo} />
+            <Text style={styles.details}>Adres: {kebabDetails.address}</Text>
+            <Text style={styles.details}>
+                Lokalizacja: {kebabDetails.latitude}, {kebabDetails.longitude}
+            </Text>
+            <Text style={styles.details}>Rok otwarcia: {kebabDetails.yearOpened}</Text>
+            {kebabDetails.yearClosed ? (
+                <Text style={styles.details}>Rok zamknięcia: {kebabDetails.yearClosed}</Text>
+            ) : (
+                <Text style={styles.details}>Status: Otwarty</Text>
+            )}
+            <Text style={styles.details}>Godziny otwarcia: {kebabDetails.hours}</Text>
+            <Text style={styles.details}>Rodzaje mięs: {kebabDetails.meats.join(', ')}</Text>
+            <Text style={styles.details}>Sosy: {kebabDetails.sauces.join(', ')}</Text>
+            <Text style={styles.details}>Kraftowość: {kebabDetails.craft ? 'Tak' : 'Nie'}</Text>
+            <Text style={styles.details}>Metody zamówienia: {kebabDetails.orderMethods.join(', ')}</Text>
+            <TouchableOpacity onPress={handleToggleFavorite}>
+                <AntDesign
+                    name={isFavorite ? 'heart' : 'hearto'}
+                    size={24}
+                    color={isFavorite ? 'red' : isDarkMode ? 'white' : 'black'}
+                />
+            </TouchableOpacity>
             <MapView
                 style={styles.map}
                 initialRegion={{
@@ -192,17 +199,9 @@ export default function KebabDetails() {
                     title={kebabDetails.name}
                 />
             </MapView>
-
-            <Text style={[styles.description, isDarkMode ? styles.darkText : styles.lightText]}>
-                {kebabDetails.description}
-            </Text>
-            <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                Opening Hours: {kebabDetails.opening_hours}
-            </Text>
             <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
                 Rating: {kebabDetails.rating}⭐
             </Text>
-
             <FlatList
                 data={comments}
                 keyExtractor={(item) => item.id}
@@ -234,7 +233,6 @@ export default function KebabDetails() {
                 )}
                 style={styles.commentsList}
             />
-
             <View style={styles.addCommentContainer}>
                 <TextInput
                     style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
@@ -256,6 +254,24 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
     },
+    title: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 20
+    },
+    logo: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        alignSelf: 'center',
+        marginBottom: 20
+    },
+    details: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginBottom: 10
+    },
     locationContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -274,11 +290,6 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginVertical: 15,
     },
-    title: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
     subText: {
         fontSize: 16,
         textAlign: 'center',
@@ -287,11 +298,6 @@ const styles = StyleSheet.create({
     description: {
         fontSize: 16,
         marginVertical: 10,
-        textAlign: 'center',
-    },
-    details: {
-        fontSize: 14,
-        marginBottom: 10,
         textAlign: 'center',
     },
     commentsList: {
@@ -378,5 +384,10 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
         textAlign: 'center',
+    },
+    details: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginBottom: 10,
     },
 });
