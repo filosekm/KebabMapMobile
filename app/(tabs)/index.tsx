@@ -3,7 +3,7 @@ import { StyleSheet, View, Platform, useColorScheme } from 'react-native';
 import { HelloWave } from '@/components/HelloWave';
 import { ThemedText } from '@/components/ThemedText';
 import MapComponent from '@/components/MapComponent';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 
 type MarkerType = {
     id: string;
@@ -15,15 +15,16 @@ type MarkerType = {
 
 export default function HomeScreen() {
     const [markers, setMarkers] = useState<MarkerType[]>([]);
-    const navigation = useNavigation();
+    const router = useRouter();
     const colorScheme = useColorScheme();
+
     const fetchMarkers = async () => {
         try {
             const response = await fetch('http://192.168.0.210/kebab_api/get_kebab_list.php');
             const data = await response.json();
             setMarkers(data);
         } catch (error) {
-            console.error("Błąd podczas pobierania danych:", error);
+            console.error('Błąd podczas pobierania danych:', error);
         }
     };
 
@@ -32,16 +33,23 @@ export default function HomeScreen() {
     }, []);
 
     const handleMarkerPress = (marker: MarkerType) => {
-        console.log(`Navigating to KebabDetails with markerId: ${marker.id}`);
-        // @ts-ignore
-        navigation.navigate('KebabDetails', { markerId: marker.id });
+        router.push({
+            pathname: '/screens/KebabDetails',
+            params: { markerId: marker.id },
+        });
     };
 
-    // @ts-ignore
     return (
         <View style={styles.container}>
-            <View style={[styles.headerContainer, colorScheme === 'dark' ? styles.darkheaderContainer : styles.lightheaderContainer]}>
-                <ThemedText style={styles.title} type="title">Welcome to Kebab Map!</ThemedText>
+            <View
+                style={[
+                    styles.headerContainer,
+                    colorScheme === 'dark' ? styles.darkheaderContainer : styles.lightheaderContainer,
+                ]}
+            >
+                <ThemedText style={styles.title} type="title">
+                    Welcome to Kebab Map!
+                </ThemedText>
                 <HelloWave />
             </View>
 
@@ -67,10 +75,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         paddingVertical: 10,
     },
-    darkheaderContainer:{
-      backgroundColor: '#1b1b1b',
+    darkheaderContainer: {
+        backgroundColor: '#1b1b1b',
     },
-    lightheaderContainer:{
+    lightheaderContainer: {
         backgroundColor: '#fff',
     },
     title: {
@@ -84,7 +92,7 @@ const styles = StyleSheet.create({
     },
     webFallback: {
         flex: 1,
-        backgroundColor:'#2e2e2e',
+        backgroundColor: '#2e2e2e',
         alignItems: 'center',
         justifyContent: 'center',
     },

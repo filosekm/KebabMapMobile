@@ -1,4 +1,4 @@
-// app/(auth)/Register.tsx
+
 import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, useColorScheme } from 'react-native';
 import { AuthContext } from '@/context/AuthContext';
@@ -37,7 +37,7 @@ export default function RegisterScreen() {
             const data = await response.json();
 
             if (response.ok) {
-                login(data.token, email);  // Pass both token and email
+                login(data.token, email);
                 router.push('/(tabs)/Profile');
             } else {
                 Alert.alert('Błąd logowania', data.message || 'Nieprawidłowe dane logowania');
