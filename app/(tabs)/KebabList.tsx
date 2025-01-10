@@ -1,11 +1,10 @@
 import { ThemedText } from '@/components/ThemedText';
 import { StyleSheet, View, Text, FlatList, TouchableOpacity, ActivityIndicator, useColorScheme } from 'react-native';
 import React, { useState, useEffect } from 'react';
-// import axios from 'axios'; // gdy API będzie gotowe
 import { useRouter } from 'expo-router';
 import { Image } from 'react-native';
 
-// przykładowe dane zeby cos sie wyswietlało
+
 const mockData = [
     {
         id: '1',
@@ -44,26 +43,26 @@ export default function KebabList() {
     const ITEMS_PER_PAGE = 5;
 
     const fetchData = async () => {
-        setLoading(true);
         try {
-            /* GDY BEDZIE API
-            const response = await axios.get(`https://api.example.com/kebabs`, {
-                params: {
-                    page: page,
-                    perPage: ITEMS_PER_PAGE,
-                    status: filterStatus !== 'all' ? filterStatus : undefined,
-                },
-            });
-            setData(response.data);
+            const response = await fetch('http://192.168.0.210/kebab_api/get_kebab_list.php');
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const rawData = await response.json();
+
+            const mappedData = rawData.map(item => ({
+                id: item.id,
+                name: item.title, // Zmapuj `title` na `name`
+                address: item.location, // Zmapuj `location` na `address`
+                latitude: item.latitude,
+                longitude: item.longitude,
+            }));
+
+            setData(mappedData); // Ustawienie danych w stanie
             setError(null);
-            */
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            setData(mockData);
-            setError(null);
-        } catch (err) {
-            setError('Failed to fetch data');
-        } finally {
-            setLoading(false);
+        } catch (error) {
+            console.error('Błąd podczas pobierania danych:', error);
+            setError(error);
         }
     };
 
@@ -73,7 +72,9 @@ export default function KebabList() {
             filteredData = filteredData.filter(item => item.status === filterStatus);
         }
         const sortedData = filteredData.sort((a, b) => {
-            return sortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+            const nameA = a.name || '';
+            const nameB = b.name || '';
+            return sortAsc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
         });
         setDisplayData(sortedData);
     }, [data, sortAsc, filterStatus]);
@@ -139,7 +140,7 @@ export default function KebabList() {
                         renderItem={({ item }) => (
                             <TouchableOpacity
                                 style={styles.item}
-                                onPress={() => router.push(`/screens/KebabDetails?markerId=${item.id}`)} // Nawigacja
+                                onPress={() => router.push(`/screens/KebabDetails?markerId=${item.id}`)}// Nawigacja
                             >
                                 <View style={styles.textContainer}>
                                     <Text style={styles.name}>{item.name}</Text>
