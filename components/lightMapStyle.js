@@ -1,4 +1,4 @@
-// lightMapStyle.js
+
 export default [
     {
         "elementType": "geometry",

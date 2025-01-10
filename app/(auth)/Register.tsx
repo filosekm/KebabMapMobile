@@ -1,13 +1,15 @@
-
-import React, { useContext, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, useColorScheme } from 'react-native';
-import { AuthContext } from '@/context/AuthContext';
-import { useRouter } from 'expo-router';
+import React, {useContext, useState} from 'react';
+import {Alert, Text, TextInput, TouchableOpacity, useColorScheme, View} from 'react-native';
+import {AuthContext} from '@/context/AuthContext';
+import {useRouter} from 'expo-router';
+import BackButton from "@/components/BackButton";
+import styles from '../styles/LoginStyles';
+import { API_ENDPOINT } from '@env';
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login } = useContext(AuthContext);
+    const {login} = useContext(AuthContext);
     const colorScheme = useColorScheme();
     const router = useRouter();
 
@@ -28,10 +30,10 @@ export default function RegisterScreen() {
         }
 
         try {
-            const response = await fetch('http://192.168.0.210/kebab_api/register.php', {
+            const response = await fetch('${API_ENDPOINT}/kebab_api/register.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email, password}),
             });
 
             const data = await response.json();
@@ -52,107 +54,66 @@ export default function RegisterScreen() {
     };
 
     return (
-        <View style={[styles.container, colorScheme === 'dark' ? styles.darkContainer : styles.lightContainer]}>
-            <Text style={[styles.title, colorScheme === 'dark' ? styles.darkText : styles.lightText]}>
-                Rejestracja
-            </Text>
-
-            <TextInput
-                style={colorScheme === 'dark' ? styles.darkInput : styles.lightInput}
-                placeholder="Email"
-                placeholderTextColor={colorScheme === 'dark' ? '#aaa' : '#555'}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-            />
-
-            <TextInput
-                style={colorScheme === 'dark' ? styles.darkInput : styles.lightInput}
-                placeholder="Hasło"
-                placeholderTextColor={colorScheme === 'dark' ? '#aaa' : '#555'}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
-
-            <TouchableOpacity
-                style={[styles.registerButton, { backgroundColor: colorScheme === 'dark' ? '#f39c12' : '#4CAF50' }]}
-                onPress={handleRegister}
-            >
-                <Text style={styles.registerButtonText}>Zarejestruj się</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={navigateToLogin}>
-                <Text style={[styles.loginLink, colorScheme === 'dark' ? styles.darkText : styles.lightText]}>
-                    Masz już konto? Zaloguj się
+        <View style={[
+            styles.container,
+            colorScheme === 'dark' ? styles.darkContainer : styles.lightContainer
+        ]}>
+            <BackButton/>
+            <View style={[
+                styles.centeredContainer,
+                colorScheme === 'dark' ? styles.darkContainer : styles.lightContainer
+            ]}>
+                <Text style={[
+                    styles.title,
+                    colorScheme === 'dark' ? styles.darkText : styles.lightText
+                ]}>
+                    Rejestracja
                 </Text>
-            </TouchableOpacity>
+
+                <TextInput
+                    style={[
+                        styles.input,
+                        colorScheme === 'dark' ? styles.darkInput : styles.lightInput
+                    ]}
+                    placeholder="Email"
+                    placeholderTextColor={colorScheme === 'dark' ? '#aaa' : '#555'}
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                />
+
+                <TextInput
+                    style={[
+                        styles.input,
+                        colorScheme === 'dark' ? styles.darkInput : styles.lightInput
+                    ]}
+                    placeholder="Password"
+                    placeholderTextColor={colorScheme === 'dark' ? '#aaa' : '#555'}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                />
+
+                <TouchableOpacity
+                    style={[
+                        styles.button,
+                        {backgroundColor: colorScheme === 'dark' ? '#f39c12' : '#4CAF50'}
+                    ]}
+                    onPress={handleRegister}
+                >
+                    <Text style={styles.buttonText}>Register</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={navigateToLogin}>
+                    <Text style={[
+                        styles.link,
+                        colorScheme === 'dark' ? styles.darkText : styles.lightText
+                    ]}>
+                        Already have an account? Log in
+                    </Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 }
-
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
-    lightContainer: {
-        backgroundColor: '#ffffff',
-    },
-    darkContainer: {
-        backgroundColor: '#121212',
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
-    lightText: {
-        color: '#000',
-    },
-    darkText: {
-        color: '#fff',
-    },
-    lightInput: {
-        width: '100%',
-        backgroundColor: '#f1f1f1',
-        borderColor: '#ccc',
-        borderWidth: 1,
-        padding: 15,
-        marginVertical: 10,
-        borderRadius: 8,
-        color: '#000',
-    },
-    darkInput: {
-        width: '100%',
-        backgroundColor: '#333',
-        borderColor: '#555',
-        borderWidth: 1,
-        padding: 15,
-        marginVertical: 10,
-        borderRadius: 8,
-        color: '#fff',
-    },
-    registerButton: {
-        paddingVertical: 15,
-        paddingHorizontal: 50,
-        borderRadius: 8,
-        marginTop: 20,
-        width: '100%',
-        alignItems: 'center',
-    },
-    registerButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    loginLink: {
-        marginTop: 20,
-        fontSize: 16,
-        textDecorationLine: 'underline',
-    },
-});

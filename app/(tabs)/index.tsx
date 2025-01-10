@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Platform, useColorScheme } from 'react-native';
-import { HelloWave } from '@/components/HelloWave';
-import { ThemedText } from '@/components/ThemedText';
+import React, {useEffect, useState} from 'react';
+import {Platform, useColorScheme, View} from 'react-native';
+import {ThemedText} from '@/components/ThemedText';
 import MapComponent from '@/components/MapComponent';
-import { useRouter } from 'expo-router';
+import {useRouter} from 'expo-router';
+import styles from '../styles/IndexStyles';
 
 type MarkerType = {
     id: string;
@@ -17,10 +17,10 @@ export default function HomeScreen() {
     const [markers, setMarkers] = useState<MarkerType[]>([]);
     const router = useRouter();
     const colorScheme = useColorScheme();
-
+    const isDarkMode = colorScheme === 'dark';
     const fetchMarkers = async () => {
         try {
-            const response = await fetch('http://192.168.0.210/kebab_api/get_kebab_list.php');
+            const response = await fetch('${API_ENDPOINT}/kebab_api/get_kebab_list.php');
             const data = await response.json();
             setMarkers(data);
         } catch (error) {
@@ -35,22 +35,18 @@ export default function HomeScreen() {
     const handleMarkerPress = (marker: MarkerType) => {
         router.push({
             pathname: '/screens/KebabDetails',
-            params: { markerId: marker.id },
+            params: {markerId: marker.id},
         });
     };
 
     return (
         <View style={styles.container}>
             <View
-                style={[
-                    styles.headerContainer,
-                    colorScheme === 'dark' ? styles.darkheaderContainer : styles.lightheaderContainer,
-                ]}
+                style={[styles.headerContainer, {backgroundColor: isDarkMode ? "#1b1b1b" : "#fff"}]}
             >
-                <ThemedText style={styles.title} type="title">
-                    Welcome to Kebab Map!
+                <ThemedText style={[styles.title, {color: isDarkMode ? "#fff" : "#000"}]} type="title">
+                    Kebab Map
                 </ThemedText>
-                <HelloWave />
             </View>
 
             <View style={styles.mapContainer}>
@@ -59,41 +55,9 @@ export default function HomeScreen() {
                         <ThemedText>Map is currently not available on the web.</ThemedText>
                     </View>
                 ) : (
-                    <MapComponent markers={markers} onMarkerPress={handleMarkerPress} />
+                    <MapComponent markers={markers} onMarkerPress={handleMarkerPress}/>
                 )}
             </View>
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    headerContainer: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 10,
-    },
-    darkheaderContainer: {
-        backgroundColor: '#1b1b1b',
-    },
-    lightheaderContainer: {
-        backgroundColor: '#fff',
-    },
-    title: {
-        marginTop: 30,
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: '#FFFFFF',
-    },
-    mapContainer: {
-        flex: 1,
-    },
-    webFallback: {
-        flex: 1,
-        backgroundColor: '#2e2e2e',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-});
