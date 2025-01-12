@@ -18,3 +18,13 @@ web-build/
 
 expo-env.d.ts
 # @end expo-cli
+.idea/templateLanguages.xml
+.idea/misc.xml
+.idea/prettier.xml
+.idea/misc.xml
+.idea/cssdialects.xml
+.idea/misc.xml
+.idea/misc.xml
+*.xml
+/android
+.env

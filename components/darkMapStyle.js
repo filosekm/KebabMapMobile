@@ -1,4 +1,4 @@
-// darkMapStyle.js
+
 export default [
     {
         "elementType": "geometry",

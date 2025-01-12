@@ -1,15 +1,13 @@
-
-import React, { useContext } from 'react';
-import { Tabs, useRouter } from 'expo-router';
-import { TouchableOpacity } from 'react-native';
-import { AuthContext } from '@/context/AuthContext';
-import { TabBarIcon } from '@/components/navigation/TabBarIcon';
-import { useColorScheme } from 'react-native';
-import { Colors } from '@/constants/Colors';
+import React, {useContext} from 'react';
+import {Tabs, useRouter} from 'expo-router';
+import {TouchableOpacity, useColorScheme} from 'react-native';
+import {AuthContext} from '@/context/AuthContext';
+import {TabBarIcon} from '@/components/navigation/TabBarIcon';
+import {Colors} from '@/constants/Colors';
 
 export default function TabLayout() {
     const colorScheme = useColorScheme();
-    const { userToken } = useContext(AuthContext);
+    const {userToken} = useContext(AuthContext);
     const router = useRouter();
 
     const handleProfileTabPress = () => {
@@ -31,17 +29,17 @@ export default function TabLayout() {
                 name="index"
                 options={{
                     title: 'Home',
-                    tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color} />
+                    tabBarIcon: ({color, focused}) => (
+                        <TabBarIcon name={focused ? 'home' : 'home-outline'} color={color}/>
                     ),
                 }}
             />
             <Tabs.Screen
                 name="KebabList"
                 options={{
-                    title: 'Kebab List',
-                    tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'list' : 'list-outline'} color={color} />
+                    title: 'Lista Kebabów',
+                    tabBarIcon: ({color, focused}) => (
+                        <TabBarIcon name={focused ? 'list' : 'list-outline'} color={color}/>
                     ),
                 }}
             />
@@ -49,14 +47,39 @@ export default function TabLayout() {
                 name="Profile"
                 options={{
                     title: 'Profil',
-                    tabBarIcon: ({ color, focused }) => (
-                        <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color} />
+                    tabBarIcon: ({color, focused}) => (
+                        <TabBarIcon name={focused ? 'person' : 'person-outline'} color={color}/>
                     ),
                     tabBarButton: (props) => (
                         <TouchableOpacity
                             {...props}
-                            onPress={() => handleProfileTabPress() && props.onPress?.()}
+                            onPress={(event) => {
+                                if (handleProfileTabPress()) {
+                                    props.onPress?.(event);
+                                }
+                            }}
                         />
+
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="Feedback"
+                options={{
+                    title: 'Feedback',
+                    tabBarIcon: ({color, focused}) => (
+                        <TabBarIcon name={focused ? 'chatbox-ellipses' : 'chatbox-ellipses-outline'} color={color}/>
+                    ),
+                    tabBarButton: (props) => (
+                        <TouchableOpacity
+                            {...props}
+                            onPress={(event) => {
+                                if (handleProfileTabPress()) {
+                                    props.onPress?.(event);
+                                }
+                            }}
+                        />
+
                     ),
                 }}
             />
