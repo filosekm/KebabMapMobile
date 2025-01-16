@@ -1,11 +1,11 @@
-import React, {useContext, useState} from 'react';
-import {Alert, Text, TextInput, TouchableOpacity, useColorScheme, View} from 'react-native';
-import {AuthContext} from '@/context/AuthContext';
+import React, { useContext, useState } from 'react';
+import { Alert, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { AuthContext } from '@/context/AuthContext';
 import BackButton from '@/components/BackButton';
 import styles from '../styles/FeedbackStyles';
 
 export default function Feedback() {
-    const {userEmail, userToken} = useContext(AuthContext);
+    const { userEmail, userToken } = useContext(AuthContext);
     const colorScheme = useColorScheme();
     const isDarkMode = colorScheme === 'dark';
 
@@ -14,19 +14,20 @@ export default function Feedback() {
 
     const handleSendFeedback = async () => {
         if (!userToken) {
-            Alert.alert('Error', 'Aby wysłać opinię, musisz się zalogować.');
+            Alert.alert('Error', 'You must be logged in to send feedback.');
             return;
         }
 
         if (!feedback.trim()) {
-            Alert.alert('Error', 'Pole tekstowe nie może być puste.');
+            Alert.alert('Error', 'Feedback cannot be empty.');
             return;
         }
 
         setLoading(true);
+
         try {
-            const response = await fetch('${API_ENDPOINT}/kebab_api/send_feedback.php', {
-                method: 'POST',
+            const response = await fetch('http://192.168.0.210:8000/api/suggestions', {
+                method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${userToken}`,
@@ -37,12 +38,16 @@ export default function Feedback() {
                 }),
             });
 
-            if (response.ok) {
-                Alert.alert('Success', 'Feedback sent successfully!');
-                setFeedback('');
-            } else {
-                Alert.alert('Error', 'Failed to send feedback. Please try again.');
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error response:', errorData);
+                Alert.alert('Error', errorData.detail || 'Failed to send feedback. Please try again.');
+                return;
             }
+
+            const data = await response.json();
+            Alert.alert('Success', data.message || 'Feedback sent successfully!');
+            setFeedback('');
         } catch (error) {
             console.error('Error sending feedback:', error);
             Alert.alert('Error', 'An unexpected error occurred. Please try again.');
@@ -51,16 +56,17 @@ export default function Feedback() {
         }
     };
 
+
     return (
         <View style={[styles.container, isDarkMode ? styles.darkBackground : styles.lightBackground]}>
             <View style={styles.header}>
-                <BackButton/>
+                <BackButton />
                 <Text style={[styles.title, isDarkMode ? styles.darkText : styles.lightText]}>
                     Feedback
                 </Text>
             </View>
             <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                Podziel się z nami swoimi przemyśleniami o aplikacji lub zgłoś problem.
+                Share your thoughts about the app or report a problem.
             </Text>
             <TextInput
                 style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
@@ -74,7 +80,8 @@ export default function Feedback() {
                 style={[
                     styles.addButton,
                     loading ? styles.disabledButton : {},
-                    !isDarkMode && {backgroundColor: '#4CAF50'},
+                    isDarkMode && { backgroundColor: '#f39c12' },
+                    !isDarkMode && { backgroundColor: '#4CAF50' },
                 ]}
                 onPress={handleSendFeedback}
                 disabled={loading}
@@ -86,4 +93,3 @@ export default function Feedback() {
         </View>
     );
 }
-

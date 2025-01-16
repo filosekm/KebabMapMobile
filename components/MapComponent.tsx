@@ -35,7 +35,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ markers, onMarkerPress }) =
 
     const fetchKebabDetails = async (kebabId: string) => {
         try {
-            const response = await fetch(`http://192.168.0.210/kebab_api/get_kebab_details.php?id=${kebabId}`);
+            const response = await fetch(`http://192.168.0.210:8000/api/kebabs/${kebabId}`);
             const data = await response.json();
             setKebabDetails(data);
         } catch (error) {

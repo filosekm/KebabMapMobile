@@ -2,13 +2,13 @@ import { ThemedText } from '@/components/ThemedText';
 import { Image, ActivityIndicator, FlatList, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import BackButton from "@/components/BackButton";
+import BackButton from '@/components/BackButton';
 import getStyles from '../styles/KebabListStyles';
 
 type KebabData = {
     id: string;
-    name: string;
-    address: string;
+    title: string;
+    location: string;
     latitude: number;
     longitude: number;
     status: string;
@@ -19,10 +19,12 @@ type KebabData = {
 
 export default function KebabList() {
     const [data, setData] = useState<KebabData[]>([]);
-    const [displayData, setDisplayData] = useState<KebabData[]>([]);
-    const [statusFilter, setStatusFilter] = useState<string | null>(null);
-    const [craftRatingFilter, setCraftRatingFilter] = useState<boolean | null>(null);
-    const [inChainFilter, setInChainFilter] = useState<boolean | null>(null);
+    const [totalKebabs, setTotalKebabs] = useState<number>(0);
+    const [filters, setFilters] = useState({
+        status: null as string | null,
+        craftRating: null as boolean | null,
+        inChain: null as boolean | null,
+    });
     const [sortAsc, setSortAsc] = useState(true);
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<Error | null>(null);
@@ -37,30 +39,26 @@ export default function KebabList() {
         try {
             setLoading(true);
 
-            // Build query parameters dynamically
-            const queryParams = new URLSearchParams();
-            if (statusFilter) queryParams.append('status', statusFilter);
-            if (craftRatingFilter !== null) queryParams.append('craft_rating', String(craftRatingFilter));
-            if (inChainFilter !== null) queryParams.append('in_chain', String(inChainFilter));
-
-            const response = await fetch(`http://192.168.0.210:8000/api/kebabs?${queryParams.toString()}`);
+            const response = await fetch('http://192.168.0.210:8000/api/kebabs');
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
-            const rawData = await response.json();
-            const mappedData: KebabData[] = rawData.map((item: any) => ({
+            const kebabs = await response.json();
+
+            setData(kebabs.map((item: any) => ({
                 id: item.id,
-                name: item.name || 'Brak nazwy',
-                address: item.location_details || 'Brak adresu',
-                latitude: item.latitude,
-                longitude: item.longitude,
+                title: item.title || 'Brak nazwy',
+                location: item.location || 'Brak adresu',
+                latitude: item.latitude || 0,
+                longitude: item.longitude || 0,
                 status: item.status || 'unknown',
                 logo: item.logo || null,
-                craftRating: item.craft_rating || false,
-                inChain: item.in_chain || false,
-            }));
-            setData(mappedData);
+                craftRating: Boolean(item.craft_rating),
+                inChain: Boolean(item.in_chain),
+            })));
+
+            setTotalKebabs(kebabs.length);
             setError(null);
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -70,19 +68,32 @@ export default function KebabList() {
         }
     };
 
-    useEffect(() => {
-        fetchData();
-    }, [statusFilter, craftRatingFilter, inChainFilter]);
 
-    useEffect(() => {
-        const sortedData = [...data].sort((a, b) => {
-            const nameA = a.name || '';
-            const nameB = b.name || '';
-            return sortAsc ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+
+    const filteredData = data
+        .filter((item) => {
+            const matchesStatus = filters.status ? item.status === filters.status : true;
+            const matchesCraftRating = filters.craftRating !== null ? item.craftRating === filters.craftRating : true;
+            const matchesInChain = filters.inChain !== null ? item.inChain === filters.inChain : true;
+            return matchesStatus && matchesCraftRating && matchesInChain;
+        })
+        .sort((a, b) => {
+            const comparison = sortAsc ? 1 : -1;
+            return a.title.localeCompare(b.title) * comparison;
         });
 
-        setDisplayData(sortedData);
-    }, [data, sortAsc]);
+
+    const paginatedData = filteredData.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+
+
+
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            fetchData();
+        }, 300);
+
+        return () => clearTimeout(timeout);
+    }, [filters, page, sortAsc]);
 
     return (
         <View style={styles.container}>
@@ -90,6 +101,7 @@ export default function KebabList() {
                 <BackButton />
                 <ThemedText style={styles.title} type="title">Lista Legnickich Kebabów</ThemedText>
             </View>
+            <Text style={styles.totalCount}>Łączna liczba kebabów: {totalKebabs}</Text>
 
             {loading ? (
                 <ActivityIndicator size="large" color="#00ff00" />
@@ -99,47 +111,62 @@ export default function KebabList() {
                 <>
                     <View style={styles.filterContainer}>
                         <Text style={styles.filterTitle}>Filtruj według:</Text>
-
-                        {/* Status Filters */}
                         <View style={styles.filterGroup}>
-                            <TouchableOpacity onPress={() => setStatusFilter(null)}>
-                                <Text style={[styles.filterButton, !statusFilter && styles.activeFilter]}>Wszystkie</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setStatusFilter('open')}>
-                                <Text style={[styles.filterButton, statusFilter === 'open' && styles.activeFilter]}>Otwarte</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setStatusFilter('closed')}>
-                                <Text style={[styles.filterButton, statusFilter === 'closed' && styles.activeFilter]}>Zamknięte</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setStatusFilter('planned')}>
-                                <Text style={[styles.filterButton, statusFilter === 'planned' && styles.activeFilter]}>Planowane</Text>
-                            </TouchableOpacity>
+                            {[
+                                { label: 'Wszystkie', value: null },
+                                { label: 'Otwarte', value: 'open' },
+                                { label: 'Zamknięte', value: 'closed' },
+                                { label: 'Planowane', value: 'planned' },
+                            ].map(({ label, value }) => (
+                                <TouchableOpacity
+                                    key={label}
+                                    onPress={() => setFilters({ ...filters, status: value })}
+                                >
+                                    <Text style={[
+                                        styles.filterButton,
+                                        filters.status === value && styles.activeFilter,
+                                    ]}>
+                                        {label}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                        <View style={styles.filterGroup}>
+                            {['Wszystkie', 'Craft', 'Non-Craft'].map((label, index) => {
+                                const value = index === 0 ? null : index === 1;
+                                return (
+                                    <TouchableOpacity
+                                        key={label}
+                                        onPress={() => setFilters({ ...filters, craftRating: value })}
+                                    >
+                                        <Text style={[
+                                            styles.filterButton,
+                                            filters.craftRating === value && styles.activeFilter,
+                                        ]}>
+                                            {label}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
                         </View>
 
-                        {/* Craft Rating Filters */}
                         <View style={styles.filterGroup}>
-                            <TouchableOpacity onPress={() => setCraftRatingFilter(null)}>
-                                <Text style={[styles.filterButton, craftRatingFilter === null && styles.activeFilter]}>Wszystkie</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setCraftRatingFilter(true)}>
-                                <Text style={[styles.filterButton, craftRatingFilter === true && styles.activeFilter]}>Craft</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setCraftRatingFilter(false)}>
-                                <Text style={[styles.filterButton, craftRatingFilter === false && styles.activeFilter]}>Non-Craft</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* In Chain Filters */}
-                        <View style={styles.filterGroup}>
-                            <TouchableOpacity onPress={() => setInChainFilter(null)}>
-                                <Text style={[styles.filterButton, inChainFilter === null && styles.activeFilter]}>Wszystkie</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setInChainFilter(true)}>
-                                <Text style={[styles.filterButton, inChainFilter === true && styles.activeFilter]}>W Sieci</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity onPress={() => setInChainFilter(false)}>
-                                <Text style={[styles.filterButton, inChainFilter === false && styles.activeFilter]}>Niezależne</Text>
-                            </TouchableOpacity>
+                            {['Wszystkie', 'W Sieci', 'Niezależne'].map((label, index) => {
+                                const value = index === 0 ? null : index === 1;
+                                return (
+                                    <TouchableOpacity
+                                        key={label}
+                                        onPress={() => setFilters({ ...filters, inChain: value })}
+                                    >
+                                        <Text style={[
+                                            styles.filterButton,
+                                            filters.inChain === value && styles.activeFilter,
+                                        ]}>
+                                            {label}
+                                        </Text>
+                                    </TouchableOpacity>
+                                );
+                            })}
                         </View>
                     </View>
 
@@ -149,25 +176,18 @@ export default function KebabList() {
                         </TouchableOpacity>
                     </View>
 
+
                     <FlatList
-                        data={displayData.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE)}
+                        data={paginatedData}
                         keyExtractor={(item) => item.id.toString()}
                         renderItem={({ item }) => (
                             <TouchableOpacity
                                 style={styles.item}
                                 onPress={() => router.push(`/screens/KebabDetails?markerId=${item.id}`)}
                             >
-                                {/* Logo */}
-                                {item.logo ? (
-                                    <Image source={{ uri: item.logo }} style={styles.logo} />
-                                ) : (
-                                    <View style={styles.logo} /> // Placeholder if no logo
-                                )}
-
-                                {/* Text Information */}
                                 <View style={styles.textContainer}>
-                                    <Text style={styles.name}>{item.name}</Text>
-                                    <Text style={styles.address}>{item.address}</Text>
+                                    <Text style={styles.name}>{item.title}</Text>
+                                    <Text style={styles.address}>{item.location}</Text>
                                     <Text style={styles.additionalInfo}>
                                         {item.status === 'open'
                                             ? 'Otwarty'
@@ -190,12 +210,10 @@ export default function KebabList() {
                         <Text style={styles.numberButton}>Strona {page}</Text>
                         <TouchableOpacity
                             onPress={() => {
-                                const totalPages = Math.ceil(displayData.length / ITEMS_PER_PAGE);
-                                if (page < totalPages) {
-                                    setPage(page + 1);
-                                }
+                                const totalPages = Math.ceil(totalKebabs / ITEMS_PER_PAGE);
+                                if (page < totalPages) setPage(page + 1);
                             }}
-                            disabled={page >= Math.ceil(displayData.length / ITEMS_PER_PAGE)}
+                            disabled={page >= Math.ceil(totalKebabs / ITEMS_PER_PAGE)}
                         >
                             <Text style={styles.pageButton}>Następna</Text>
                         </TouchableOpacity>

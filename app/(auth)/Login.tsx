@@ -14,10 +14,10 @@ export default function LoginScreen() {
 
     const handleLogin = async () => {
         try {
-            const response = await fetch('${API_ENDPOINT}/kebab_api/login.php', {
+            const response = await fetch('http://192.168.0.210:8000/api/login_user', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email, password}),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
             });
 
             const data = await response.json();
@@ -26,13 +26,15 @@ export default function LoginScreen() {
                 await login(data.token, email);
                 router.push('/(tabs)/Profile');
             } else {
-                Alert.alert('Błąd logowania', data.message || 'Nieprawidłowe dane logowania');
+                Alert.alert('Login Error', data.message || 'Invalid login credentials.');
             }
         } catch (error) {
-            Alert.alert('Błąd', 'Wystąpił problem z logowaniem. Spróbuj ponownie później.');
+            Alert.alert('Error', 'An unexpected error occurred during login.');
             console.error('Error during login:', error);
         }
     };
+
+
 
     const navigateToRegister = () => {
         router.push('/(auth)/Register');

@@ -1,51 +1,62 @@
-import React, {useContext, useState} from 'react';
-import {Alert, Text, TextInput, TouchableOpacity, useColorScheme, View} from 'react-native';
-import {AuthContext} from '@/context/AuthContext';
-import {useRouter} from 'expo-router';
-import BackButton from "@/components/BackButton";
+import React, { useContext, useState } from 'react';
+import { Alert, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { AuthContext } from '@/context/AuthContext';
+import { useRouter } from 'expo-router';
+import BackButton from '@/components/BackButton';
 import styles from '../styles/LoginStyles';
-import { API_ENDPOINT } from '@env';
 
 export default function RegisterScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const {login} = useContext(AuthContext);
+    const { login } = useContext(AuthContext);
     const colorScheme = useColorScheme();
     const router = useRouter();
+
 
     const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return emailRegex.test(email);
     };
 
+
+    const validatePassword = (password: string) => {
+        return password.length >= 8;
+    };
+
     const handleRegister = async () => {
         if (!email || !password) {
-            Alert.alert('Błąd walidacji', 'Email i hasło nie mogą być puste.');
+            Alert.alert('Validation Error', 'Email and password cannot be empty.');
             return;
         }
 
         if (!validateEmail(email)) {
-            Alert.alert('Błąd walidacji', 'Wprowadź poprawny adres email.');
+            Alert.alert('Validation Error', 'Please enter a valid email address.');
+            return;
+        }
+
+        if (!validatePassword(password)) {
+            Alert.alert('Validation Error', 'Password must be at least 8 characters long.');
             return;
         }
 
         try {
-            const response = await fetch('${API_ENDPOINT}/kebab_api/register.php', {
+            const response = await fetch('http://192.168.0.210:8000/api/register_user', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({email, password}),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
             });
 
             const data = await response.json();
 
-            if (response.ok) {
+            if (response.ok && data.token) {
                 login(data.token, email);
                 router.push('/(tabs)/Profile');
             } else {
-                Alert.alert('Błąd logowania', data.message || 'Nieprawidłowe dane logowania');
+                Alert.alert('Registration Error', data.message || 'Failed to register. Please try again.');
             }
         } catch (error) {
-            Alert.alert('Błąd', 'Wystąpił problem z rejestracją. Spróbuj ponownie później.');
+            Alert.alert('Error', 'An error occurred during registration. Please try again later.');
+            console.error('Registration error:', error);
         }
     };
 
@@ -58,7 +69,7 @@ export default function RegisterScreen() {
             styles.container,
             colorScheme === 'dark' ? styles.darkContainer : styles.lightContainer
         ]}>
-            <BackButton/>
+            <BackButton />
             <View style={[
                 styles.centeredContainer,
                 colorScheme === 'dark' ? styles.darkContainer : styles.lightContainer
@@ -67,7 +78,7 @@ export default function RegisterScreen() {
                     styles.title,
                     colorScheme === 'dark' ? styles.darkText : styles.lightText
                 ]}>
-                    Rejestracja
+                    Register
                 </Text>
 
                 <TextInput
@@ -98,7 +109,7 @@ export default function RegisterScreen() {
                 <TouchableOpacity
                     style={[
                         styles.button,
-                        {backgroundColor: colorScheme === 'dark' ? '#f39c12' : '#4CAF50'}
+                        { backgroundColor: colorScheme === 'dark' ? '#f39c12' : '#4CAF50' }
                     ]}
                     onPress={handleRegister}
                 >
