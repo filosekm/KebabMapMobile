@@ -1,5 +1,5 @@
 import { ThemedText } from '@/components/ThemedText';
-import { Image, ActivityIndicator, FlatList, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ActivityIndicator, FlatList, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
 import BackButton from '@/components/BackButton';
@@ -39,24 +39,29 @@ export default function KebabList() {
         try {
             setLoading(true);
 
-            const response = await fetch('http://192.168.0.210:8000/api/kebabs');
+            const response = await fetch('http://192.168.0.210:8000/api/kebabs/legnica');
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
-            const kebabs = await response.json();
+            const result = await response.json();
+            console.log(result);
+            const kebabs = result.kebabs;
+            console.log(kebabs);
 
-            setData(kebabs.map((item: any) => ({
-                id: item.id,
-                title: item.title || 'Brak nazwy',
-                location: item.location || 'Brak adresu',
-                latitude: item.latitude || 0,
-                longitude: item.longitude || 0,
-                status: item.status || 'unknown',
-                logo: item.logo || null,
-                craftRating: Boolean(item.craft_rating),
-                inChain: Boolean(item.in_chain),
-            })));
+            setData(
+                kebabs.map((item: any, index: number) => ({
+                    id: item.id ? item.id.toString() : index.toString(),
+                    title: item.name || 'Brak nazwy',
+                    location: `${item.latitude}, ${item.longitude}` || 'Brak adresu',
+                    latitude: item.latitude || 0,
+                    longitude: item.longitude || 0,
+                    status: item.status || 'unknown',
+                    logo: item.logo || null,
+                    craftRating: Boolean(item.craft_rating),
+                    inChain: Boolean(item.in_chain),
+                }))
+            );
 
             setTotalKebabs(kebabs.length);
             setError(null);
@@ -187,7 +192,6 @@ export default function KebabList() {
                             >
                                 <View style={styles.textContainer}>
                                     <Text style={styles.name}>{item.title}</Text>
-                                    <Text style={styles.address}>{item.location}</Text>
                                     <Text style={styles.additionalInfo}>
                                         {item.status === 'open'
                                             ? 'Otwarty'

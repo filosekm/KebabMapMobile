@@ -45,11 +45,11 @@ export default function Feedback() {
                 body: JSON.stringify(payload),
             });
 
-            const rawResponseText = await response.text(); // Read the raw response text
+            const rawResponseText = await response.text();
             console.log('Raw Response:', rawResponseText);
 
             if (!response.ok) {
-                // Attempt to parse JSON, fallback to showing raw text if it fails
+
                 try {
                     const errorData = JSON.parse(rawResponseText);
                     console.error('Error response:', errorData);

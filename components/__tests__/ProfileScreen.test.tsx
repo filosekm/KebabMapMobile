@@ -24,7 +24,7 @@ describe('ProfileScreen Component', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
-        jest.spyOn(Alert, 'alert').mockImplementation(() => {}); // Mock Alert.alert
+        jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     });
 
     test('renders correctly with light mode', () => {
@@ -34,8 +34,8 @@ describe('ProfileScreen Component', () => {
             </AuthContext.Provider>
         );
 
-        expect(getByText('test')).toBeTruthy(); // Username derived from email
-        expect(getByText('Wyloguj')).toBeTruthy(); // Logout button
+        expect(getByText('test')).toBeTruthy();
+        expect(getByText('Wyloguj')).toBeTruthy();
     });
 
     test('handles logout correctly', () => {

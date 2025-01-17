@@ -1,4 +1,4 @@
-import {StyleSheet} from 'react-native';
+import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
     container: {
@@ -15,23 +15,38 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: '#000',
         marginTop: 18,
     },
-    detailTitle: {
-        fontWeight: 'bold',
-        marginBottom: 3,
+    backgroundImage: {
+        resizeMode: 'contain',
+        opacity: 0.1,
     },
-    detailValue: {
-        marginLeft: 10,
-        fontSize: 14,
-    },
-    logo: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        alignSelf: 'center',
+    infoContainer: {
         marginBottom: 20,
+        borderRadius: 10,
+        padding: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    lightInfoContainer: {
+        backgroundColor: '#F5F5F5',
+    },
+    darkInfoContainer: {
+        backgroundColor: '#2C2C2C',
+    },
+    details: {
+        fontSize: 14,
+        textAlign: 'left',
+        marginBottom: 10,
+    },
+    lightText: {
+        color: '#000',
+    },
+    darkText: {
+        color: '#fff',
     },
     mapContainer: {
         borderRadius: 15,
@@ -39,63 +54,32 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     map: {
-        height: 200,
+        height: 150,
         width: '100%',
     },
-    infoContainer: {
-        marginBottom: 20,
-        backgroundColor: '#f9f9f9',
-        borderRadius: 10,
-        padding: 15,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 3,
+    openingHoursContainer: {
+        marginBottom: 15,
+        padding: 5,
     },
-    scrollContent: {
-        marginTop: 1,
-    },
-    scrollContainer: {
-        paddingBottom: 20,
-    },
-    darkInfoContainer: {
-        backgroundColor: '#2C2C2C',
-    },
-    lightInfoContainer: {
-        backgroundColor: '#F5F5F5',
-    },
-    details: {
-        fontSize: 14,
-        textAlign: 'left',
-        marginBottom: 10,
-        color: '#333',
-    },
-    label: {
+    detailTitle: {
         fontWeight: 'bold',
         fontSize: 14,
         marginBottom: 3,
         color: '#555',
     },
-    value: {
+    detailValue: {
+        marginLeft: 10,
         fontSize: 14,
         marginBottom: 10,
         color: '#000',
     },
-    sectionHeader: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 15,
-        color: '#000',
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
+    openingHoursHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         paddingBottom: 5,
-    },
-    darkText: {
-        color: '#fff',
-    },
-    lightText: {
-        color: '#000',
+        borderBottomWidth: 1,
+        marginBottom: 10,
     },
     commentsList: {
         flexGrow: 0,
@@ -147,25 +131,26 @@ const styles = StyleSheet.create({
         color: '#fff',
     },
     addButton: {
-        backgroundColor: '#4CAF50',
         borderRadius: 8,
         padding: 10,
         marginLeft: 10,
     },
-    addButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
+    lightBackground: {
+        backgroundColor: '#fff',
     },
     darkBackground: {
         backgroundColor: '#121212',
     },
-    lightBackground: {
-        backgroundColor: '#ffffff',
-    },
     loadingText: {
         fontSize: 18,
         textAlign: 'center',
-        color: '#000',
+    },
+    scrollContent: {
+        flex: 1,
+        marginTop: 10,
+    },
+    scrollContainer: {
+        paddingBottom: 20,
     },
 });
 

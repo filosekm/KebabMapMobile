@@ -69,6 +69,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ markers, onMarkerPress }) =
                     <Marker
                         key={marker.id}
                         testID={`marker-${marker.id}`}
+                        image={require('@/assets/images/kebab-icon.png')}
                         coordinate={{
                             latitude: marker.latitude,
                             longitude: marker.longitude,

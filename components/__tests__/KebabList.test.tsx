@@ -109,7 +109,7 @@ describe('KebabList Component', () => {
         });
 
         await waitFor(() => {
-            expect(getByText('Kebab 3')).toBeTruthy(); // Assuming descending order
+            expect(getByText('Kebab 3')).toBeTruthy();
         });
 
         act(() => {
@@ -117,7 +117,7 @@ describe('KebabList Component', () => {
         });
 
         await waitFor(() => {
-            expect(getByText('Kebab 1')).toBeTruthy(); // Back to ascending
+            expect(getByText('Kebab 1')).toBeTruthy();
         });
     });
 });

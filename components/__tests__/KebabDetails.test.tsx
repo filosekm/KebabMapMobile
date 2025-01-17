@@ -82,12 +82,12 @@ describe('KebabDetails Component', () => {
             expect(getByText('Mock Location')).toBeTruthy();
         });
 
-        // Ensure opening hours are displayed correctly
+
         await waitFor(() => {
             expect(getByText('Poniedziałek: 10:00 - 22:00')).toBeTruthy();
         });
 
-        // Verify other kebab details
+
         expect(getByText('Chicken, Beef')).toBeTruthy();
         expect(getByText('Garlic, Spicy')).toBeTruthy();
         expect(getByText('4.5 ⭐')).toBeTruthy();

@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { ScrollView, Alert, FlatList, Image, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ImageBackground, Alert, FlatList, Image, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useLocalSearchParams } from 'expo-router';
 import { AuthContext } from '@/context/AuthContext';
 import { AntDesign } from '@expo/vector-icons';
 import styles from '../styles/KebabDetailsStyles';
 import BackButton from '@/components/BackButton';
-
+import { ScrollView } from 'react-native-virtualized-view'
 
 
 type CommentType = {
@@ -54,6 +54,7 @@ export default function KebabDetails() {
     const [comments, setComments] = useState<CommentType[]>([]);
     const [newComment, setNewComment] = useState('');
     const [openingHours, setOpeningHours] = useState<OpeningHours | null>(null);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     useEffect(() => {
         if (markerId) {
@@ -88,25 +89,26 @@ export default function KebabDetails() {
             }
             const data = await response.json();
 
+
             const mappedData: KebabDetailsType = {
-                id: data.id.toString(),
-                title: data.title,
+                id: data.id?.toString() || '0',
+                title: data.name || 'Brak tytułu',
                 logo: data.logo || '',
-                location: data.location || 'Brak adresu',
-                latitude: data.latitude,
-                longitude: data.longitude,
-                description: data.description || '',
+                location: data.description || 'Brak adresu',
+                latitude: data.latitude || 0,
+                longitude: data.longitude || 0,
+                description: data.location_details || 'Brak opisu',
                 opening_hours: data.opening_hours || 'Brak danych',
                 rating: data.google_rating || 0,
                 yearOpened: data.year_opened || new Date().getFullYear(),
                 yearClosed: data.year_closed || null,
-                hours: typeof data.opening_hours === 'string' ? JSON.parse(data.opening_hours) : data.opening_hours,
-                meats: data.meats ? data.meats.split(',') : [],
-                sauces: data.sauces ? data.sauces.split(',') : [],
+                hours: typeof data.opening_hours === 'string' ? JSON.parse(data.opening_hours) : data.opening_hours || {},
+                meats: data.meats ? data.meats.split(', ') : [],
+                sauces: data.sauces ? data.sauces.split(', ') : [],
                 status: data.status || 'unknown',
-                craft: data.craft_rating || false,
-                orderMethods: data.order_methods ? data.order_methods.split(',') : [],
-                isFavorite: data.is_favorite,
+                craft: Boolean(data.craft_rating),
+                orderMethods: data.order_methods ? data.order_methods.split(', ') : [],
+                isFavorite: data.is_favorite || false,
             };
 
             setKebabDetails(mappedData);
@@ -114,6 +116,7 @@ export default function KebabDetails() {
             console.error('Error fetching kebab details:', error);
         }
     };
+
 
     const fetchOpeningHours = async () => {
         if (!userToken) {
@@ -214,7 +217,6 @@ export default function KebabDetails() {
             });
             if (response.ok) {
                 const data = await response.json();
-                console.log(data);
                 const isFav = data.some((fav: { id: string }) => fav.id === markerId);
                 setIsFavorite(isFav);
             } else {
@@ -271,6 +273,7 @@ export default function KebabDetails() {
         );
     }
     return (
+
         <View style={[styles.container, isDarkMode ? styles.darkBackground : styles.lightBackground]}>
             <View style={styles.header}>
                 <BackButton/>
@@ -287,21 +290,23 @@ export default function KebabDetails() {
                 </TouchableOpacity>
             </View>
 
-            <Image source={{uri: kebabDetails?.logo}} style={styles.logo}/>
+
 
             <ScrollView
                 style={styles.scrollContent}
                 contentContainerStyle={styles.scrollContainer}
+                nestedScrollEnabled={true}
             >
 
             <View style={styles.mapContainer}>
                 <MapView
                     style={styles.map}
+
                     initialRegion={{
                         latitude: kebabDetails?.latitude || 0,
                         longitude: kebabDetails?.longitude || 0,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
+                        latitudeDelta: 0.001,
+                        longitudeDelta: 0.001,
                     }}
                 >
                     <Marker
@@ -309,12 +314,20 @@ export default function KebabDetails() {
                             latitude: kebabDetails?.latitude || 0,
                             longitude: kebabDetails?.longitude || 0,
                         }}
+                        image={require('@/assets/images/kebab-icon.png')}
                         title={kebabDetails?.title}
                     />
                 </MapView>
             </View>
-
-            <View style={[styles.infoContainer, isDarkMode ? styles.darkInfoContainer : styles.lightInfoContainer]}>
+                <ImageBackground
+                    source={
+                        kebabDetails?.logo
+                            ? { uri: kebabDetails.logo }
+                            : require('@/assets/images/default-logo.png')
+                    }
+                    style={[styles.infoContainer, isDarkMode ? styles.darkInfoContainer : styles.lightInfoContainer]}
+                    imageStyle={styles.backgroundImage}
+                >
                 <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
                     Adres:
                 </Text>
@@ -349,39 +362,64 @@ export default function KebabDetails() {
                     </>
                 )}
 
-                <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
-                    Ocena:
-                </Text>
-                <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
-                    {kebabDetails?.rating?.toFixed(1)} ⭐
-                </Text>
-
-                {kebabDetails?.description ? (
-                    <>
-                        <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
-                            Opis:
-                        </Text>
-                        <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
-                            {kebabDetails.description}
-                        </Text>
-                    </>
-                ) : null}
-
-                <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
-                    Godziny otwarcia:
-                </Text>
-                {openingHours ? (
-                    Object.entries(openingHours).map(([day, times]) => (
-                        <Text key={day} style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
-                            {`${daysTranslation[day] || day}: ${times.open} - ${times.close}`}
-                        </Text>
-                    ))
-                ) : (
-                    <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
-                        Brak danych o godzinach otwarcia.
+                    <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
+                        Ocena:
                     </Text>
-                )}
+                    <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                        {kebabDetails?.rating?.toFixed(1)} ⭐
+                    </Text>
 
+                    {kebabDetails?.description ? (
+                        <>
+                            <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
+                                Opis:
+                            </Text>
+                            <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                                {kebabDetails.description}
+                            </Text>
+                        </>
+                    ) : null}
+
+                    <View style={styles.openingHoursContainer}>
+                        <TouchableOpacity
+                            style={styles.openingHoursHeader}
+                            onPress={() => setIsExpanded(!isExpanded)}
+                        >
+                            <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
+                                Godziny otwarcia:
+                            </Text>
+                            <AntDesign
+                                name={isExpanded ? 'up' : 'down'}
+                                size={16}
+                                color={isDarkMode ? '#fff' : '#000'}
+                            />
+                        </TouchableOpacity>
+
+                        {isExpanded ? (
+                            openingHours ? (
+                                Object.entries(openingHours).map(([day, times]) => (
+                                    <Text key={day} style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                                        {`${daysTranslation[day] || day}: ${times.open} - ${times.close}`}
+                                    </Text>
+                                ))
+                            ) : (
+                                <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                                    Brak danych o godzinach otwarcia.
+                                </Text>
+                            )
+                        ) : (
+                            (() => {
+                                const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+                                const todayTimes = openingHours?.[today];
+                                const todayTranslated = daysTranslation[today] || today;
+                                return (
+                                    <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                                        {`${todayTranslated}: ${todayTimes?.open || 'Brak'} - ${todayTimes?.close || 'Brak'}`}
+                                    </Text>
+                                );
+                            })()
+                        )}
+                    </View>
                 <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
                     Rodzaje mięs:
                 </Text>
@@ -409,7 +447,7 @@ export default function KebabDetails() {
                 <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
                     {kebabDetails?.orderMethods.length > 0 ? kebabDetails.orderMethods.join(', ') : 'Brak danych'}
                 </Text>
-            </View>
+                </ImageBackground>
 
 
             <Text style={[styles.commentsHeader, isDarkMode ? styles.darkText : styles.lightText]}>
@@ -419,6 +457,7 @@ export default function KebabDetails() {
             <FlatList
                 data={comments}
                 keyExtractor={(item) => item.id.toString()}
+                nestedScrollEnabled={true}
                 renderItem={({item}) => (
                     <View
                         style={[
