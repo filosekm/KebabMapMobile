@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Alert, FlatList, Image, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { ScrollView, Alert, FlatList, Image, Text, TextInput, TouchableOpacity, useColorScheme, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useLocalSearchParams } from 'expo-router';
 import { AuthContext } from '@/context/AuthContext';
@@ -65,6 +65,15 @@ export default function KebabDetails() {
         }
     }, [markerId]);
 
+    const daysTranslation = {
+        monday: "Poniedziałek",
+        tuesday: "Wtorek",
+        wednesday: "Środa",
+        thursday: "Czwartek",
+        friday: "Piątek",
+        saturday: "Sobota",
+        sunday: "Niedziela",
+    };
     const fetchKebabDetails = async () => {
         try {
             const response = await fetch(`http://192.168.0.210:8000/api/kebabs/${markerId}`);
@@ -107,7 +116,7 @@ export default function KebabDetails() {
         }
 
         try {
-            const response = await fetch('http://192.168.0.210:8000/api/opening_hours/bulk', {
+            const response = await fetch('http://192.168.0.210:8000/api/kebab-hours', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -193,6 +202,7 @@ export default function KebabDetails() {
             });
             if (response.ok) {
                 const data = await response.json();
+                console.log(data);
                 const isFav = data.some((fav: { id: string }) => fav.id === markerId);
                 setIsFavorite(isFav);
             } else {
@@ -267,6 +277,11 @@ export default function KebabDetails() {
 
             <Image source={{uri: kebabDetails?.logo}} style={styles.logo}/>
 
+            <ScrollView
+                style={styles.scrollContent}
+                contentContainerStyle={styles.scrollContainer}
+            >
+
             <View style={styles.mapContainer}>
                 <MapView
                     style={styles.map}
@@ -287,67 +302,103 @@ export default function KebabDetails() {
                 </MapView>
             </View>
 
-            <View style={styles.infoContainer}>
-                <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                    Adres: {kebabDetails?.location}
+            <View style={[styles.infoContainer, isDarkMode ? styles.darkInfoContainer : styles.lightInfoContainer]}>
+                <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
+                    Adres:
+                </Text>
+                <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                    {kebabDetails?.location || 'Brak adresu'}
                 </Text>
 
-                <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                    Rok otwarcia: {kebabDetails?.yearOpened}
+                <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
+                    Rok otwarcia:
+                </Text>
+                <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                    {kebabDetails?.yearOpened}
                 </Text>
 
                 {kebabDetails?.yearClosed ? (
-                    <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                        Rok zamknięcia: {kebabDetails?.yearClosed}
-                    </Text>
+                    <>
+                        <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
+                            Rok zamknięcia:
+                        </Text>
+                        <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                            {kebabDetails?.yearClosed}
+                        </Text>
+                    </>
                 ) : (
-                    <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                        Status: {kebabDetails?.status === 'open' ? 'Otwarty' : 'Nieznany'}
-                    </Text>
+                    <>
+                        <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
+                            Status:
+                        </Text>
+                        <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                            {kebabDetails?.status === 'open' ? 'Otwarty' : 'Nieznany'}
+                        </Text>
+                    </>
                 )}
 
-                <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                    Ocena: {kebabDetails?.rating?.toFixed(1)} ⭐
+                <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
+                    Ocena:
+                </Text>
+                <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                    {kebabDetails?.rating?.toFixed(1)} ⭐
                 </Text>
 
                 {kebabDetails?.description ? (
-                    <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                        Opis: {kebabDetails.description}
-                    </Text>
+                    <>
+                        <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
+                            Opis:
+                        </Text>
+                        <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                            {kebabDetails.description}
+                        </Text>
+                    </>
                 ) : null}
 
-                <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
+                <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
                     Godziny otwarcia:
                 </Text>
                 {openingHours ? (
                     Object.entries(openingHours).map(([day, times]) => (
-                        <Text key={day} style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                            {`${day}: ${times.open} - ${times.close}`}
+                        <Text key={day} style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                            {`${daysTranslation[day] || day}: ${times.open} - ${times.close}`}
                         </Text>
                     ))
                 ) : (
-                    <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
+                    <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
                         Brak danych o godzinach otwarcia.
                     </Text>
                 )}
 
-                <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                    Rodzaje mięs: {kebabDetails?.meats.length > 0 ? kebabDetails.meats.join(', ') : 'Brak danych'}
+                <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
+                    Rodzaje mięs:
+                </Text>
+                <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                    {kebabDetails?.meats.length > 0 ? kebabDetails.meats.join(', ') : 'Brak danych'}
                 </Text>
 
-                <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                    Sosy: {kebabDetails?.sauces.length > 0 ? kebabDetails.sauces.join(', ') : 'Brak danych'}
+                <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
+                    Sosy:
+                </Text>
+                <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                    {kebabDetails?.sauces.length > 0 ? kebabDetails.sauces.join(', ') : 'Brak danych'}
                 </Text>
 
-                <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                    Kraftowość: {kebabDetails?.craft ? 'Tak' : 'Nie'}
+                <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
+                    Kraftowość:
+                </Text>
+                <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                    {kebabDetails?.craft ? 'Tak' : 'Nie'}
                 </Text>
 
-                <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                    Metody
-                    zamówienia: {kebabDetails?.orderMethods.length > 0 ? kebabDetails.orderMethods.join(', ') : 'Brak danych'}
+                <Text style={[styles.details, styles.detailTitle, isDarkMode ? styles.darkText : styles.lightText]}>
+                    Metody zamówienia:
+                </Text>
+                <Text style={[styles.details, styles.detailValue, isDarkMode ? styles.darkText : styles.lightText]}>
+                    {kebabDetails?.orderMethods.length > 0 ? kebabDetails.orderMethods.join(', ') : 'Brak danych'}
                 </Text>
             </View>
+
 
             <Text style={[styles.commentsHeader, isDarkMode ? styles.darkText : styles.lightText]}>
                 Comments
@@ -400,6 +451,7 @@ export default function KebabDetails() {
                     <Text style={styles.addButtonText}>Add</Text>
                 </TouchableOpacity>
             </View>
+            </ScrollView>
         </View>
     );
 }
