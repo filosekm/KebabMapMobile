@@ -18,10 +18,18 @@ const styles = StyleSheet.create({
         color: '#000',
         marginTop: 18,
     },
+    detailTitle: {
+        fontWeight: 'bold',
+        marginBottom: 3,
+    },
+    detailValue: {
+        marginLeft: 10,
+        fontSize: 14,
+    },
     logo: {
-        width: 50,
-        height: 50,
-        borderRadius: 50,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
         alignSelf: 'center',
         marginBottom: 20,
     },
@@ -36,12 +44,52 @@ const styles = StyleSheet.create({
     },
     infoContainer: {
         marginBottom: 20,
+        backgroundColor: '#f9f9f9',
+        borderRadius: 10,
+        padding: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    scrollContent: {
+        marginTop: 1,
+    },
+    scrollContainer: {
+        paddingBottom: 20,
+    },
+    darkInfoContainer: {
+        backgroundColor: '#2C2C2C',
+    },
+    lightInfoContainer: {
+        backgroundColor: '#F5F5F5',
     },
     details: {
         fontSize: 14,
         textAlign: 'left',
-        marginBottom: 5,
+        marginBottom: 10,
+        color: '#333',
+    },
+    label: {
+        fontWeight: 'bold',
+        fontSize: 14,
+        marginBottom: 3,
+        color: '#555',
+    },
+    value: {
+        fontSize: 14,
+        marginBottom: 10,
         color: '#000',
+    },
+    sectionHeader: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        color: '#000',
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+        paddingBottom: 5,
     },
     darkText: {
         color: '#fff',
