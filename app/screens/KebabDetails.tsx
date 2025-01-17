@@ -15,7 +15,6 @@ type CommentType = {
     text: string;
 };
 
-// Type for opening hours
 type OpeningHours = {
     [day: string]: {
         open: string;
@@ -61,9 +60,16 @@ export default function KebabDetails() {
             fetchKebabDetails();
             fetchComments();
             fetchFavoriteStatus();
-            fetchOpeningHours();
         }
     }, [markerId]);
+
+    useEffect(() => {
+        if (kebabDetails) {
+            fetchOpeningHours();
+        }
+    }, [kebabDetails]);
+
+
 
     const daysTranslation = {
         monday: "Poniedziałek",
@@ -115,6 +121,11 @@ export default function KebabDetails() {
             return;
         }
 
+        if (!kebabDetails?.title) {
+            console.warn('Kebab details or title is missing. Skipping fetchOpeningHours.');
+            return;
+        }
+
         try {
             const response = await fetch('http://192.168.0.210:8000/api/kebab-hours', {
                 method: 'GET',
@@ -129,7 +140,7 @@ export default function KebabDetails() {
             }
 
             const data = await response.json();
-            const kebabHours = data.find((item: { name: string }) => item.name === kebabDetails?.title);
+            const kebabHours = data.find((item: { name: string }) => item.name === kebabDetails.title);
 
             if (kebabHours) {
                 const parsedHours = typeof kebabHours.hours === 'string'
@@ -137,12 +148,13 @@ export default function KebabDetails() {
                     : kebabHours.hours;
                 setOpeningHours(parsedHours);
             } else {
-                console.warn('No opening hours found for:', kebabDetails?.title);
+                console.warn('No opening hours found for:', kebabDetails.title);
             }
         } catch (error) {
             console.error('Error fetching opening hours:', error);
         }
     };
+
 
     const fetchComments = async () => {
         try {
@@ -265,7 +277,7 @@ export default function KebabDetails() {
                 <Text style={[styles.title, isDarkMode ? styles.darkText : styles.lightText]}>
                     {kebabDetails?.title}
                 </Text>
-                <TouchableOpacity onPress={toggleFavorite}>
+                <TouchableOpacity testID="favorite-button" onPress={toggleFavorite}>
                     <AntDesign
                         name={isFavorite ? 'heart' : 'hearto'}
                         size={24}

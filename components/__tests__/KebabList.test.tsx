@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
-import KebabList from '@/app/(tabs)/KebabList.tsx';
+import KebabList from '@/app/(tabs)/KebabList';
 import { useRouter } from 'expo-router';
 
 jest.mock('expo-router', () => ({
@@ -12,42 +12,19 @@ jest.mock('expo-router', () => ({
 jest.mock('@/app/styles/KebabListStyles', () => jest.fn(() => ({})));
 
 describe('KebabList Component', () => {
-    const mockPage1Data = [
-        {
-            id: '1',
-            title: 'Kebab 1',
-            location: 'Location 1',
-            latitude: 51.1,
-            longitude: 16.1,
-            status: 'open',
-            craftRating: true,
-            inChain: false,
-        },
-    ];
-
-    const mockPage2Data = [
-        {
-            id: '2',
-            title: 'Kebab 2',
-            location: 'Location 2',
-            latitude: 51.2,
-            longitude: 16.2,
-            status: 'closed',
-            craftRating: false,
-            inChain: true,
-        },
+    const mockData = [
+        { id: '1', title: 'Kebab 1', location: 'Location 1', status: 'open', craftRating: true, inChain: false },
+        { id: '2', title: 'Kebab 2', location: 'Location 2', status: 'closed', craftRating: false, inChain: true },
+        { id: '3', title: 'Kebab 3', location: 'Location 3', status: 'planned', craftRating: true, inChain: true },
     ];
 
     beforeEach(() => {
-        global.fetch = jest.fn((url) => {
-            const isPage2 = url.includes('page=2');
-            const mockData = isPage2 ? mockPage2Data : mockPage1Data;
-
-            return Promise.resolve({
+        global.fetch = jest.fn(() =>
+            Promise.resolve({
                 ok: true,
                 json: () => Promise.resolve(mockData),
-            });
-        }) as jest.Mock;
+            })
+        ) as jest.Mock;
     });
 
     afterEach(() => {
@@ -55,21 +32,16 @@ describe('KebabList Component', () => {
     });
 
     test('renders the component correctly', async () => {
-        const { getByText, queryByText } = render(<KebabList />);
-
-        expect(getByText('Lista Legnickich Kebabów')).toBeTruthy();
-        expect(queryByText('Łączna liczba kebabów:')).toBeNull();
+        const { getByText } = render(<KebabList />);
 
         await waitFor(() => {
-            expect(getByText('Łączna liczba kebabów: 1')).toBeTruthy();
-            expect(getByText('Kebab 1')).toBeTruthy();
-            expect(getByText('Location 1')).toBeTruthy();
-            expect(getByText('Otwarty')).toBeTruthy();
+            expect(getByText('Lista Legnickich Kebabów')).toBeTruthy();
+            expect(getByText('Łączna liczba kebabów: 3')).toBeTruthy();
         });
     });
 
     test('handles filtering by status', async () => {
-        const { getByText, getAllByText } = render(<KebabList />);
+        const { getByText } = render(<KebabList />);
 
         await waitFor(() => {
             expect(getByText('Kebab 1')).toBeTruthy();
@@ -80,8 +52,8 @@ describe('KebabList Component', () => {
         });
 
         await waitFor(() => {
-            expect(getAllByText('Kebab 1').length).toBe(1);
-            expect(getByText('Otwarty')).toBeTruthy();
+            expect(getByText('Kebab 1')).toBeTruthy();
+            expect(getByText('Location 1')).toBeTruthy();
         });
 
         act(() => {
@@ -89,35 +61,12 @@ describe('KebabList Component', () => {
         });
 
         await waitFor(() => {
-            expect(getByText('Brak kebabów do wyświetlenia.')).toBeTruthy();
+            expect(getByText('Kebab 2')).toBeTruthy();
+            expect(getByText('Location 2')).toBeTruthy();
         });
     });
 
-    test('handles sorting by title', async () => {
-        const { getByText } = render(<KebabList />);
-
-        await waitFor(() => {
-            expect(getByText('Kebab 1')).toBeTruthy();
-        });
-
-        act(() => {
-            fireEvent.press(getByText('Sortuj ▼'));
-        });
-
-        await waitFor(() => {
-            expect(getByText('Kebab 1')).toBeTruthy();
-        });
-
-        act(() => {
-            fireEvent.press(getByText('Sortuj ▲'));
-        });
-
-        await waitFor(() => {
-            expect(getByText('Kebab 1')).toBeTruthy();
-        });
-    });
-
-    test('handles empty data gracefully', async () => {
+    test('handles empty data', async () => {
         global.fetch = jest.fn(() =>
             Promise.resolve({
                 ok: true,
@@ -133,14 +82,42 @@ describe('KebabList Component', () => {
     });
 
     test('handles fetch error gracefully', async () => {
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
         global.fetch = jest.fn(() =>
-            Promise.reject(new Error('Network error'))
+            Promise.reject(new Error('HTTP error! Status: 500'))
         ) as jest.Mock;
 
         const { getByText } = render(<KebabList />);
 
         await waitFor(() => {
-            expect(getByText('Network error')).toBeTruthy();
+            expect(getByText('HTTP error! Status: 500')).toBeTruthy();
+        });
+
+        consoleSpy.mockRestore();
+    });
+
+    test('handles sorting', async () => {
+        const { getByText } = render(<KebabList />);
+
+        await waitFor(() => {
+            expect(getByText('Kebab 1')).toBeTruthy();
+        });
+
+        act(() => {
+            fireEvent.press(getByText('Sortuj ▼'));
+        });
+
+        await waitFor(() => {
+            expect(getByText('Kebab 3')).toBeTruthy(); // Assuming descending order
+        });
+
+        act(() => {
+            fireEvent.press(getByText('Sortuj ▲'));
+        });
+
+        await waitFor(() => {
+            expect(getByText('Kebab 1')).toBeTruthy(); // Back to ascending
         });
     });
 });

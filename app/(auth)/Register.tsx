@@ -106,7 +106,7 @@ export default function RegisterScreen() {
                     secureTextEntry
                 />
 
-                <TouchableOpacity
+                <TouchableOpacity testID="register-button"
                     style={[
                         styles.button,
                         { backgroundColor: colorScheme === 'dark' ? '#f39c12' : '#4CAF50' }

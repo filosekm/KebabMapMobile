@@ -24,7 +24,6 @@ export default function HomeScreen() {
             const data = await response.json();
             setMarkers(data);
         } catch (error) {
-            console.error('Błąd podczas pobierania danych:', error);
         }
     };
 
@@ -49,9 +48,9 @@ export default function HomeScreen() {
                 </ThemedText>
             </View>
 
-            <View style={styles.mapContainer}>
+            <View testID="map-container" style={styles.mapContainer} >
                 {Platform.OS === 'web' ? (
-                    <View style={styles.webFallback}>
+                    <View  testID="web-fallback" style={styles.webFallback}>
                         <ThemedText>Map is currently not available on the web.</ThemedText>
                     </View>
                 ) : (

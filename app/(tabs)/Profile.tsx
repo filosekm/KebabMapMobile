@@ -45,12 +45,13 @@ export default function ProfileScreen() {
     };
 
     return (
-        <View style={[styles.container, isDarkMode ? styles.darkBackground : styles.lightBackground]}>
+        <View style={[styles.container, isDarkMode ? styles.darkBackground : styles.lightBackground]}
+              testID="container">
             <BackButton/>
             <View style={[styles.Infocontainer, isDarkMode ? styles.darkBackground : styles.lightBackground]}>
                 <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
                     {profileImage ? (
-                        <Image source={{uri: profileImage}} style={styles.profileImage}/>
+                        <Image  source={{uri: profileImage}} style={styles.profileImage} testID="profile-image"/>
                     ) : (
                         <View
                             style={[styles.placeholderImage, isDarkMode ? styles.darkPlaceholder : styles.lightPlaceholder]}>

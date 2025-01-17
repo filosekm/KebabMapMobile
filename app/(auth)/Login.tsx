@@ -30,7 +30,6 @@ export default function LoginScreen() {
             }
         } catch (error) {
             Alert.alert('Error', 'An unexpected error occurred during login.');
-            console.error('Error during login:', error);
         }
     };
 
@@ -88,6 +87,7 @@ export default function LoginScreen() {
                         {backgroundColor: colorScheme === 'dark' ? '#f39c12' : '#4CAF50'}
                     ]}
                     onPress={handleLogin}
+                    testID="login-button"
                 >
                     <Text style={styles.buttonText}>Zaloguj się</Text>
                 </TouchableOpacity>

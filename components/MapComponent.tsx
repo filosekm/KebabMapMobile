@@ -68,6 +68,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ markers, onMarkerPress }) =
                 {markers.map(marker => (
                     <Marker
                         key={marker.id}
+                        testID={`marker-${marker.id}`}
                         coordinate={{
                             latitude: marker.latitude,
                             longitude: marker.longitude,

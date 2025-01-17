@@ -14,6 +14,8 @@ export default function Feedback() {
     const [feedback, setFeedback] = useState('');
     const [loading, setLoading] = useState(false);
 
+
+
     const handleSendFeedback = async () => {
         if (!userToken) {
             Alert.alert('Error', 'You must be logged in to send feedback.');
