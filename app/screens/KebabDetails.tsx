@@ -207,6 +207,7 @@ export default function KebabDetails() {
 
     const fetchFavoriteStatus = async () => {
         if (!userToken) return;
+
         try {
             const response = await fetch(`http://192.168.0.210:8000/api/favorites`, {
                 method: 'GET',
@@ -215,9 +216,15 @@ export default function KebabDetails() {
                     Authorization: `Bearer ${userToken}`,
                 },
             });
+
             if (response.ok) {
                 const data = await response.json();
-                const isFav = data.some((fav: { id: string }) => fav.id === markerId);
+
+                // Sprawdzenie, czy obecny markerId jest na liście ulubionych
+                const isFav = data.some((fav: { id: number; is_favorite: boolean }) =>
+                    fav.id.toString() === markerId && fav.is_favorite
+                );
+
                 setIsFavorite(isFav);
             } else {
                 console.error('Failed to fetch favorite status:', response.status);
@@ -237,9 +244,11 @@ export default function KebabDetails() {
             ? `http://192.168.0.210:8000/api/kebabs/${markerId}/unfavorite`
             : `http://192.168.0.210:8000/api/kebabs/${markerId}/favorite`;
 
+        const method = isFavorite ? 'DELETE' : 'POST'; // Zmiana metody na DELETE
+
         try {
             const response = await fetch(endpoint, {
-                method: 'POST',
+                method,
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${userToken}`,
@@ -255,13 +264,21 @@ export default function KebabDetails() {
                         : 'Added to favorites!'
                 );
             } else {
-                Alert.alert('Error', 'Failed to update favorites. Please try again.');
+                const errorData = await response.json();
+                console.error('Error response:', errorData);
+                Alert.alert(
+                    'Error',
+                    errorData.message || 'Failed to update favorites. Please try again.'
+                );
             }
         } catch (error) {
             console.error('Error toggling favorite:', error);
             Alert.alert('Error', 'An unexpected error occurred.');
         }
     };
+
+
+
 
     if (!kebabDetails) {
         return (
@@ -499,7 +516,7 @@ export default function KebabDetails() {
                     ]}
                     onPress={handleAddComment}
                 >
-                    <Text style={styles.addButtonText}>Add</Text>
+                    <Text>Add</Text>
                 </TouchableOpacity>
             </View>
             </ScrollView>

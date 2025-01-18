@@ -15,7 +15,6 @@ export default function Feedback() {
     const [loading, setLoading] = useState(false);
 
 
-
     const handleSendFeedback = async () => {
         if (!userToken) {
             Alert.alert('Error', 'You must be logged in to send feedback.');
@@ -31,12 +30,12 @@ export default function Feedback() {
 
         try {
             const payload = {
+                name: name.trim(),
                 email: email.trim(),
                 message: feedback.trim(),
-                name: name.trim(),
             };
 
-            const response = await fetch('http://192.168.0.210:8000/api/feedback', {
+            const response = await fetch('http://192.168.0.210:8000/api/suggestions-feedback', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -45,25 +44,16 @@ export default function Feedback() {
                 body: JSON.stringify(payload),
             });
 
-            const rawResponseText = await response.text();
-            console.log('Raw Response:', rawResponseText);
+            const isJson = response.headers.get('content-type')?.includes('application/json');
+            const data = isJson ? await response.json() : null;
 
             if (!response.ok) {
-
-                try {
-                    const errorData = JSON.parse(rawResponseText);
-                    console.error('Error response:', errorData);
-                    Alert.alert('Error', errorData.detail || 'Failed to send feedback. Please try again.');
-                } catch (parseError) {
-                    console.error('Non-JSON response:', rawResponseText);
-                    Alert.alert('Error', 'Unexpected response from the server.');
-                }
+                console.error('Error response:', data || 'No response body');
+                Alert.alert('Error', data?.message || 'Unexpected server error. Please try again later.');
                 return;
             }
 
-            const data = JSON.parse(rawResponseText); // Parse JSON response if successful
-            console.log(data);
-            Alert.alert('Success', data.message || 'Feedback sent successfully!');
+            Alert.alert('Success', data?.message || 'Feedback sent successfully!');
             setName('');
             setEmail('');
             setFeedback('');
@@ -74,6 +64,8 @@ export default function Feedback() {
             setLoading(false);
         }
     };
+
+
 
 
     return (

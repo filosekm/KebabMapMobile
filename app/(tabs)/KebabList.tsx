@@ -45,9 +45,7 @@ export default function KebabList() {
             }
 
             const result = await response.json();
-            console.log(result);
             const kebabs = result.kebabs;
-            console.log(kebabs);
 
             setData(
                 kebabs.map((item: any, index: number) => ({
