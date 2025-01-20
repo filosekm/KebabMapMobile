@@ -9,64 +9,75 @@ export default function Feedback() {
     const colorScheme = useColorScheme();
     const isDarkMode = colorScheme === 'dark';
 
-    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
-    const [feedback, setFeedback] = useState('');
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
 
+    const kebabId = 1;
 
     const handleSendFeedback = async () => {
         if (!userToken) {
-            Alert.alert('Error', 'You must be logged in to send feedback.');
+            Alert.alert('Error', 'Musisz się zalogować, żeby wysłać feedback');
             return;
         }
 
-        if (!name.trim() || !email.trim() || !feedback.trim()) {
-            Alert.alert('Error', 'All fields are required.');
+        if (!title.trim() || !description.trim() || !email.trim()) {
+            Alert.alert('Error', 'Wszystkie pola są wymagane.');
             return;
         }
 
         setLoading(true);
 
-        try {
-            const payload = {
-                name: name.trim(),
-                email: email.trim(),
-                message: feedback.trim(),
-            };
+        const payload = {
+            kebab_id: kebabId,
+            name: title.trim(),
+            email: email.trim(),
+            message: description.trim(),
+        };
 
-            const response = await fetch('http://192.168.0.210:8000/api/suggestions-feedback', {
+        console.log('Wysyłanie danych:', payload);
+
+        try {
+            const response = await fetch('https://kebabapipanel-tg6o.onrender.com/api/suggestions-feedback', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    Accept: 'application/json',
                     Authorization: `Bearer ${userToken}`,
                 },
                 body: JSON.stringify(payload),
             });
 
-            const isJson = response.headers.get('content-type')?.includes('application/json');
-            const data = isJson ? await response.json() : null;
+            const contentType = response.headers.get('content-type');
+            let data;
+
+            if (contentType && contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                throw new Error('Otrzymano nieprawidłową odpowiedź od serwera.');
+            }
 
             if (!response.ok) {
-                console.error('Error response:', data || 'No response body');
-                Alert.alert('Error', data?.message || 'Unexpected server error. Please try again later.');
+                if (data?.email) {
+                    Alert.alert('Nieprawidłowy adres email', data.email[0]);
+                } else {
+                    Alert.alert('Error', 'Wystąpił nieznany błąd.');
+                }
                 return;
             }
 
-            Alert.alert('Success', data?.message || 'Feedback sent successfully!');
-            setName('');
+            Alert.alert('Success', data?.message || 'Pomyślnie wysłano');
+            setTitle('');
+            setDescription('');
             setEmail('');
-            setFeedback('');
         } catch (error) {
-            console.error('Error sending feedback:', error);
-            Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+            console.error('Błąd wysyłania feedbacku:', error);
+            Alert.alert('Error', 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.');
         } finally {
             setLoading(false);
         }
     };
-
-
-
 
     return (
         <View style={[styles.container, isDarkMode ? styles.darkBackground : styles.lightBackground]}>
@@ -77,18 +88,19 @@ export default function Feedback() {
                 </Text>
             </View>
             <Text style={[styles.details, isDarkMode ? styles.darkText : styles.lightText]}>
-                Share your thoughts about the app or report a problem.
+                Podziel się swoimi przemyśleniami o aplikacji lub zgłoś problem.
             </Text>
+
             <TextInput
                 style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
-                placeholder="Your Name"
+                placeholder="Twoje imię"
                 placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
-                value={name}
-                onChangeText={setName}
+                value={title}
+                onChangeText={setTitle}
             />
             <TextInput
                 style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
-                placeholder="Your Email"
+                placeholder="Adres Email"
                 placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
                 value={email}
                 onChangeText={setEmail}
@@ -96,10 +108,10 @@ export default function Feedback() {
             />
             <TextInput
                 style={[styles.input, isDarkMode ? styles.darkInput : styles.lightInput]}
-                placeholder="Write your feedback here..."
+                placeholder="Wiadomość"
                 placeholderTextColor={isDarkMode ? '#aaa' : '#555'}
-                value={feedback}
-                onChangeText={setFeedback}
+                value={description}
+                onChangeText={setDescription}
                 multiline
             />
             <TouchableOpacity
@@ -113,7 +125,7 @@ export default function Feedback() {
                 disabled={loading}
             >
                 <Text style={styles.addButtonText}>
-                    {loading ? 'Sending...' : 'Send Feedback'}
+                    {loading ? 'Wysyłanie...' : 'Wyślij Feedback'}
                 </Text>
             </TouchableOpacity>
         </View>

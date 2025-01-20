@@ -20,7 +20,7 @@ export default function HomeScreen() {
     const isDarkMode = colorScheme === 'dark';
     const fetchMarkers = async () => {
         try {
-            const response = await fetch('http://192.168.0.210:8000/api/kebabs');
+            const response = await fetch('https://kebabapipanel-tg6o.onrender.com/api/kebabs');
             const data = await response.json();
             setMarkers(data);
         } catch (error) {

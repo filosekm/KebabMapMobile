@@ -112,7 +112,7 @@ describe('ProfileScreen Component', () => {
         fireEvent.press(getByText('Dodaj zdjęcie'));
 
         await waitFor(() => {
-            expect(Alert.alert).not.toHaveBeenCalled(); // No alert for canceled operation
+            expect(Alert.alert).not.toHaveBeenCalled();
         });
     });
 

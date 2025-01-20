@@ -55,6 +55,7 @@ export default function KebabDetails() {
     const [newComment, setNewComment] = useState('');
     const [openingHours, setOpeningHours] = useState<OpeningHours | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     useEffect(() => {
         if (markerId) {
@@ -83,7 +84,7 @@ export default function KebabDetails() {
     };
     const fetchKebabDetails = async () => {
         try {
-            const response = await fetch(`http://192.168.0.210:8000/api/kebabs/${markerId}`);
+            const response = await fetch(`https://kebabapipanel-tg6o.onrender.com/api/kebabs/${markerId}`);
             if (!response.ok) {
                 throw new Error(`Failed to fetch kebab details: ${response.status}`);
             }
@@ -113,7 +114,7 @@ export default function KebabDetails() {
 
             setKebabDetails(mappedData);
         } catch (error) {
-            console.error('Error fetching kebab details:', error);
+            setErrorMessage('Error fetching kebab details:');
         }
     };
 
@@ -130,7 +131,7 @@ export default function KebabDetails() {
         }
 
         try {
-            const response = await fetch('http://192.168.0.210:8000/api/kebab-hours', {
+            const response = await fetch('https://kebabapipanel-tg6o.onrender.com/api/kebab-hours', {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -154,21 +155,21 @@ export default function KebabDetails() {
                 console.warn('No opening hours found for:', kebabDetails.title);
             }
         } catch (error) {
-            console.error('Error fetching opening hours:', error);
+            setErrorMessage('Error fetching opening hours:');
         }
     };
 
 
     const fetchComments = async () => {
         try {
-            const response = await fetch(`http://192.168.0.210:8000/api/kebabs/${markerId}/comments`);
+            const response = await fetch(`https://kebabapipanel-tg6o.onrender.com/api/kebabs/${markerId}/comments`);
             if (!response.ok) {
                 throw new Error(`Failed to fetch comments: ${response.status}`);
             }
             const data: CommentType[] = await response.json();
             setComments(data);
         } catch (error) {
-            console.error('Error fetching comments:', error);
+            setErrorMessage('Error fetching comments');
         }
     };
 
@@ -182,7 +183,7 @@ export default function KebabDetails() {
             return;
         }
         try {
-            const response = await fetch(`http://192.168.0.210:8000/api/kebabs/${markerId}/comment`, {
+            const response = await fetch(`https://kebabapipanel-tg6o.onrender.com/api/kebabs/${markerId}/comment`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -201,7 +202,7 @@ export default function KebabDetails() {
                 Alert.alert('Error', errorData.message || 'Failed to add comment.');
             }
         } catch (error) {
-            console.error('Error adding comment:', error);
+            setErrorMessage('Error adding comment:');
         }
     };
 
@@ -209,7 +210,7 @@ export default function KebabDetails() {
         if (!userToken) return;
 
         try {
-            const response = await fetch(`http://192.168.0.210:8000/api/favorites`, {
+            const response = await fetch(`https://kebabapipanel-tg6o.onrender.com/api/favorites`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -219,8 +220,6 @@ export default function KebabDetails() {
 
             if (response.ok) {
                 const data = await response.json();
-
-                // Sprawdzenie, czy obecny markerId jest na liście ulubionych
                 const isFav = data.some((fav: { id: number; is_favorite: boolean }) =>
                     fav.id.toString() === markerId && fav.is_favorite
                 );
@@ -230,7 +229,7 @@ export default function KebabDetails() {
                 console.error('Failed to fetch favorite status:', response.status);
             }
         } catch (error) {
-            console.error('Error fetching favorite status:', error);
+            setErrorMessage('Nie udało się pobrać statusu ulubionego.');
         }
     };
 
@@ -241,10 +240,10 @@ export default function KebabDetails() {
         }
 
         const endpoint = isFavorite
-            ? `http://192.168.0.210:8000/api/kebabs/${markerId}/unfavorite`
-            : `http://192.168.0.210:8000/api/kebabs/${markerId}/favorite`;
+            ? `https://kebabapipanel-tg6o.onrender.com/api/kebabs/${markerId}/unfavorite`
+            : `https://kebabapipanel-tg6o.onrender.com/api/kebabs/${markerId}/favorite`;
 
-        const method = isFavorite ? 'DELETE' : 'POST'; // Zmiana metody na DELETE
+        const method = isFavorite ? 'DELETE' : 'POST';
 
         try {
             const response = await fetch(endpoint, {
@@ -272,7 +271,7 @@ export default function KebabDetails() {
                 );
             }
         } catch (error) {
-            console.error('Error toggling favorite:', error);
+            setErrorMessage('Error toggling favorite');
             Alert.alert('Error', 'An unexpected error occurred.');
         }
     };

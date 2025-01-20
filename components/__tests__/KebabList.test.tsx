@@ -1,8 +1,9 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import KebabList from '@/app/(tabs)/KebabList';
-import { useRouter } from 'expo-router';
 
+
+jest.mock('@/components/BackButton', () => 'MockedBackButton');
 jest.mock('expo-router', () => ({
     useRouter: jest.fn(() => ({
         push: jest.fn(),
@@ -10,6 +11,8 @@ jest.mock('expo-router', () => ({
 }));
 
 jest.mock('@/app/styles/KebabListStyles', () => jest.fn(() => ({})));
+
+
 
 describe('KebabList Component', () => {
     const mockData = [
@@ -22,10 +25,17 @@ describe('KebabList Component', () => {
         global.fetch = jest.fn(() =>
             Promise.resolve({
                 ok: true,
-                json: () => Promise.resolve(mockData),
+                json: () => Promise.resolve({
+                    kebabs: [
+                        { id: '1', name: 'Kebab 1', latitude: 51.2, longitude: 16.3, status: 'open', craft_rating: true, in_chain: false },
+                        { id: '2', name: 'Kebab 2', latitude: 51.3, longitude: 16.4, status: 'closed', craft_rating: false, in_chain: true },
+                        { id: '3', name: 'Kebab 3', latitude: 51.4, longitude: 16.5, status: 'planned', craft_rating: true, in_chain: true },
+                    ],
+                }),
             })
         ) as jest.Mock;
     });
+
 
     afterEach(() => {
         jest.clearAllMocks();
@@ -40,7 +50,7 @@ describe('KebabList Component', () => {
         });
     });
 
-    test('handles filtering by status', async () => {
+    test('filters kebabs by status', async () => {
         const { getByText } = render(<KebabList />);
 
         await waitFor(() => {
@@ -53,7 +63,7 @@ describe('KebabList Component', () => {
 
         await waitFor(() => {
             expect(getByText('Kebab 1')).toBeTruthy();
-            expect(getByText('Location 1')).toBeTruthy();
+            expect(() => getByText('Kebab 2')).toThrow();
         });
 
         act(() => {
@@ -62,7 +72,7 @@ describe('KebabList Component', () => {
 
         await waitFor(() => {
             expect(getByText('Kebab 2')).toBeTruthy();
-            expect(getByText('Location 2')).toBeTruthy();
+            expect(() => getByText('Kebab 1')).toThrow();
         });
     });
 

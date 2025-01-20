@@ -40,7 +40,7 @@ export default function RegisterScreen() {
         }
 
         try {
-            const response = await fetch('http://192.168.0.210:8000/api/register_user', {
+            const response = await fetch('https://kebabapipanel-tg6o.onrender.com/api/register_user', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),

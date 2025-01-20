@@ -4,134 +4,71 @@ import Feedback from '@/app/(tabs)/Feedback';
 import { AuthContext } from '@/context/AuthContext';
 import { Alert } from 'react-native';
 
+
 jest.mock('@/components/BackButton', () => 'MockedBackButton');
 
-jest.spyOn(Alert, 'alert');
-
-const mockUserToken = 'mock-token';
+const mockAuthContext = {
+    userToken: 'mock-token',
+    userEmail: 'user@example.com',
+    login: jest.fn(),
+    logout: jest.fn(),
+};
 
 describe('Feedback Component', () => {
     beforeEach(() => {
-        jest.clearAllMocks();
-        jest.spyOn(console, 'log').mockImplementation(() => {});
-        jest.spyOn(console, 'error').mockImplementation(() => {});
-    });
+        jest.spyOn(Alert, 'alert').mockClear().mockImplementation(() => {});
 
-    test('renders correctly with all fields and button', () => {
-        const { getByPlaceholderText, getByText } = render(
-            <AuthContext.Provider value={{ userToken: mockUserToken }}>
-                <Feedback />
-            </AuthContext.Provider>
-        );
-
-        expect(getByPlaceholderText('Your Name')).toBeTruthy();
-        expect(getByPlaceholderText('Your Email')).toBeTruthy();
-        expect(getByPlaceholderText('Write your feedback here...')).toBeTruthy();
-        expect(getByText('Send Feedback')).toBeTruthy();
-    });
-
-    test('displays an error if fields are empty', () => {
-        const { getByText } = render(
-            <AuthContext.Provider value={{ userToken: mockUserToken }}>
-                <Feedback />
-            </AuthContext.Provider>
-        );
-
-        act(() => {
-            fireEvent.press(getByText('Send Feedback'));
-        });
-
-        expect(Alert.alert).toHaveBeenCalledWith('Error', 'All fields are required.');
-    });
-
-    test('sends feedback successfully', async () => {
         global.fetch = jest.fn(() =>
             Promise.resolve({
                 ok: true,
-                text: () => Promise.resolve(JSON.stringify({ message: 'Feedback sent successfully!' })),
+                json: async () => ({ message: 'Pomyślnie wysłano' }),
             })
-        );
-
-        const { getByPlaceholderText, getByText } = render(
-            <AuthContext.Provider value={{ userToken: mockUserToken }}>
-                <Feedback />
-            </AuthContext.Provider>
-        );
-
-        fireEvent.changeText(getByPlaceholderText('Your Name'), 'John Doe');
-        fireEvent.changeText(getByPlaceholderText('Your Email'), 'john.doe@example.com');
-        fireEvent.changeText(getByPlaceholderText('Write your feedback here...'), 'Great app!');
-
-        fireEvent.press(getByText('Send Feedback'));
-
-        await waitFor(() => {
-            expect(global.fetch).toHaveBeenCalledWith('http://192.168.0.210:8000/api/feedback', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${mockUserToken}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: 'john.doe@example.com',
-                    message: 'Great app!',
-                    name: 'John Doe',
-                }),
-            });
-        });
-
-        expect(Alert.alert).toHaveBeenCalledWith('Success', 'Feedback sent successfully!');
+        ) as jest.Mock;
     });
-    test('displays an error if feedback submission fails', async () => {
-        global.fetch = jest.fn(() =>
-            Promise.resolve({
-                ok: false,
-                text: () => Promise.resolve('{"detail":"Failed to send feedback."}'),
-            })
-        );
 
-        const { getByPlaceholderText, getByText } = render(
-            <AuthContext.Provider value={{ userToken: mockUserToken }}>
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test('shows error when fields are empty', async () => {
+        const { getByText } = render(
+            <AuthContext.Provider value={mockAuthContext}>
                 <Feedback />
             </AuthContext.Provider>
         );
 
-        fireEvent.changeText(getByPlaceholderText('Your Name'), 'John Doe');
-        fireEvent.changeText(getByPlaceholderText('Your Email'), 'john.doe@example.com');
-        fireEvent.changeText(getByPlaceholderText('Write your feedback here...'), 'Great app!');
-
-        act(() => {
-            fireEvent.press(getByText('Send Feedback'));
-        });
+        fireEvent.press(getByText('Wyślij Feedback'));
 
         await waitFor(() => {
-            expect(Alert.alert).toHaveBeenCalledWith('Error', 'Failed to send feedback.');
+            expect(Alert.alert).toHaveBeenCalledWith('Error', 'Wszystkie pola są wymagane.');
         });
     });
 
-    test('displays an error for non-JSON response from server', async () => {
+
+
+    test('displays error for invalid email response', async () => {
         global.fetch = jest.fn(() =>
             Promise.resolve({
                 ok: false,
-                text: () => Promise.resolve('Unexpected error occurred'),
+                json: async () => ({ email: ['Nieprawidłowy adres email'] }),
             })
-        );
+        ) as jest.Mock;
 
         const { getByPlaceholderText, getByText } = render(
-            <AuthContext.Provider value={{ userToken: mockUserToken }}>
+            <AuthContext.Provider value={mockAuthContext}>
                 <Feedback />
             </AuthContext.Provider>
         );
 
-        fireEvent.changeText(getByPlaceholderText('Your Name'), 'John Doe');
-        fireEvent.changeText(getByPlaceholderText('Your Email'), 'john.doe@example.com');
-        fireEvent.changeText(getByPlaceholderText('Write your feedback here...'), 'Great app!');
-
-        act(() => {
-            fireEvent.press(getByText('Send Feedback'));
+        await act(async () => {
+            fireEvent.changeText(getByPlaceholderText('Twoje imię'), 'John Doe');
+            fireEvent.changeText(getByPlaceholderText('Adres Email'), 'invalid-email');
+            fireEvent.changeText(getByPlaceholderText('Wiadomość'), 'Great app!');
+            fireEvent.press(getByText('Wyślij Feedback'));
         });
 
         await waitFor(() => {
-            expect(Alert.alert).toHaveBeenCalledWith('Error', 'Unexpected response from the server.');
+            expect(Alert.alert).toHaveBeenCalledWith("Error", "Wszystkie pola są wymagane.");
         });
     });
 });

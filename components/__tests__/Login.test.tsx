@@ -17,7 +17,7 @@ describe('LoginScreen Component', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         (useRouter as jest.Mock).mockReturnValue({ push: mockPush });
-        jest.spyOn(Alert, 'alert').mockImplementation(() => {}); // Mock Alert.alert
+        jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     });
 
     test('renders correctly', () => {

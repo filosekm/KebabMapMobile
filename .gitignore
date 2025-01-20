@@ -28,3 +28,4 @@ expo-env.d.ts
 *.xml
 /android
 .env
+/coverage

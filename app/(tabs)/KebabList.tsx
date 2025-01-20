@@ -39,12 +39,17 @@ export default function KebabList() {
         try {
             setLoading(true);
 
-            const response = await fetch('http://192.168.0.210:8000/api/kebabs/legnica');
+            const response = await fetch('https://kebabapipanel-tg6o.onrender.com/api/kebabs/legnica');
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
             const result = await response.json();
+
+            if (!result || !Array.isArray(result.kebabs)) {
+                throw new Error('Invalid data format received from server');
+            }
+
             const kebabs = result.kebabs;
 
             setData(
@@ -180,31 +185,34 @@ export default function KebabList() {
                     </View>
 
 
-                    <FlatList
-                        data={paginatedData}
-                        keyExtractor={(item) => item.id.toString()}
-                        renderItem={({ item }) => (
-                            <TouchableOpacity
-                                style={styles.item}
-                                onPress={() => router.push(`/screens/KebabDetails?markerId=${item.id}`)}
-                            >
-                                <View style={styles.textContainer}>
-                                    <Text style={styles.name}>{item.title}</Text>
-                                    <Text style={styles.additionalInfo}>
-                                        {item.status === 'open'
-                                            ? 'Otwarty'
-                                            : item.status === 'closed'
-                                                ? 'Zamknięty'
-                                                : 'Planowany'}
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-                        )}
-                        ListEmptyComponent={
-                            <Text style={styles.emptyMessage}>Brak kebabów do wyświetlenia.</Text>
-                        }
-                    />
-
+                    {error ? (
+                        <Text style={styles.errorText}>Wystąpił błąd: {error.message}</Text>
+                    ) : (
+                        <FlatList
+                            data={paginatedData}
+                            keyExtractor={(item) => item.id.toString()}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    style={styles.item}
+                                    onPress={() => router.push(`/screens/KebabDetails?markerId=${item.id}`)}
+                                >
+                                    <View style={styles.textContainer}>
+                                        <Text style={styles.name}>{item.title}</Text>
+                                        <Text style={styles.additionalInfo}>
+                                            {item.status === 'open'
+                                                ? 'Otwarty'
+                                                : item.status === 'closed'
+                                                    ? 'Zamknięty'
+                                                    : 'Planowany'}
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+                            ListEmptyComponent={
+                                <Text style={styles.emptyMessage}>Brak kebabów do wyświetlenia.</Text>
+                            }
+                        />
+                    )}
                     <View style={styles.pagination}>
                         <TouchableOpacity onPress={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>
                             <Text style={styles.pageButton}>Poprzednia</Text>
