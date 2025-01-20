@@ -22,10 +22,12 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     input: {
+        borderWidth: 1,
+        borderColor: '#ddd',
         borderRadius: 8,
         padding: 10,
-        textAlignVertical: 'top',
-        minHeight: 150,
+        marginBottom: 15,
+        fontSize: 16,
     },
     lightInput: {
         backgroundColor: '#f9f9f9',
@@ -46,12 +48,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 15,
     },
+    disabledButton: {
+        backgroundColor: '#ccc',
+    },
     addButtonText: {
         color: '#fff',
+        fontSize: 16,
         fontWeight: 'bold',
-    },
-    disabledButton: {
-        backgroundColor: '#aaa',
     },
     darkBackground: {
         backgroundColor: '#1e1e1e',

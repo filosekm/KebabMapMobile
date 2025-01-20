@@ -94,8 +94,8 @@ const getStyles = (colorScheme: string) =>
             marginTop: 14,
         },
         item: {
-            flexDirection: 'row', // Aligns logo and content horizontally
-            alignItems: 'flex-start', // Ensures items are aligned at the top
+            flexDirection: 'row',
+            alignItems: 'flex-start',
             padding: 10,
             borderBottomWidth: 1,
             borderBottomColor: colorScheme === 'dark' ? '#444' : '#CCC',
@@ -108,16 +108,23 @@ const getStyles = (colorScheme: string) =>
             height: 50,
             borderRadius: 25,
             backgroundColor: colorScheme === 'dark' ? '#444' : '#DDD',
-            marginRight: 10, // Spacing between logo and text
+            marginRight: 10,
+        },
+        totalCount: {
+            fontSize: 16,
+            fontWeight: '600',
+            marginTop: 10,
+            color: colorScheme === 'dark' ? '#FFFFFF' : '#000000',
+            textAlign: 'center',
         },
         textContainer: {
-            flex: 1, // Ensures the text takes up remaining space
+            flex: 1,
         },
         name: {
             fontSize: 16,
             fontWeight: 'bold',
             color: colorScheme === 'dark' ? '#FFFFFF' : '#000000',
-            marginBottom: 4, // Spacing between name and additional info
+            marginBottom: 4,
         },
         address: {
             fontSize: 14,

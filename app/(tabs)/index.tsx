@@ -20,11 +20,10 @@ export default function HomeScreen() {
     const isDarkMode = colorScheme === 'dark';
     const fetchMarkers = async () => {
         try {
-            const response = await fetch('${API_ENDPOINT}/kebab_api/get_kebab_list.php');
+            const response = await fetch('https://kebabapipanel-tg6o.onrender.com/api/kebabs');
             const data = await response.json();
             setMarkers(data);
         } catch (error) {
-            console.error('Błąd podczas pobierania danych:', error);
         }
     };
 
@@ -49,9 +48,9 @@ export default function HomeScreen() {
                 </ThemedText>
             </View>
 
-            <View style={styles.mapContainer}>
+            <View testID="map-container" style={styles.mapContainer} >
                 {Platform.OS === 'web' ? (
-                    <View style={styles.webFallback}>
+                    <View  testID="web-fallback" style={styles.webFallback}>
                         <ThemedText>Map is currently not available on the web.</ThemedText>
                     </View>
                 ) : (

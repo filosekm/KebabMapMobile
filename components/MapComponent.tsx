@@ -35,7 +35,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ markers, onMarkerPress }) =
 
     const fetchKebabDetails = async (kebabId: string) => {
         try {
-            const response = await fetch(`http://192.168.0.210/kebab_api/get_kebab_details.php?id=${kebabId}`);
+            const response = await fetch(`https://kebabapipanel-tg6o.onrender.com/api/kebabs/${kebabId}`);
             const data = await response.json();
             setKebabDetails(data);
         } catch (error) {
@@ -68,6 +68,8 @@ const MapComponent: React.FC<MapComponentProps> = ({ markers, onMarkerPress }) =
                 {markers.map(marker => (
                     <Marker
                         key={marker.id}
+                        testID={`marker-${marker.id}`}
+                        image={require('@/assets/images/kebab-icon.png')}
                         coordinate={{
                             latitude: marker.latitude,
                             longitude: marker.longitude,
